@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Cube Clipping Demo</title>
+		<link rel="stylesheet" href="./webgl.css" type="text/css">
+		<script src="./src/m4.js"></script>
+		<script src="./src/webgl-utils.js"></script>
+		<script src="./src/primitives.js"></script>
+		<script src="main.js" defer></script>
+	</head>
+
+	<body>
+		<canvas id="glcanvas"></canvas>
+		<div id="uiContainer">
+			<div id="ui">
+				<div id="objectList">
+					<p>Select Object Here Below:</p>
+					<input type="radio" name="objectType" id="cube" checked>
+					<label for="cube">Cube</label>
+					<input type="radio" name="objectType" id="prism">
+					<label for="prism">Prism</label>
+					<input type="radio" name="objectType" id="slinder">
+					<label for="slinder">Slinder</label>
+					<input type="radio" name="objectType" id="cone">
+					<label for="cone">Cone</label>
+					<input type="radio" name="objectType" id="trun-cone">
+					<label for="trun-cone">Truncated Cone</label>
+					<input type="radio" name="objectType" id="tri-prism">
+					<label for="tri-prism">Triangular Prism</label>
+				</div>
+				<div id="sliderList">
+					<p>Adjust Slider Here:</p>
+					<p>Plane Translation Control</p>
+					<input type="range" name="slider" value="0" min="-6" max="6" step="0.1" id="xTranslation" list="translation">
+					<label id="xTranslationValue" name="tag" for="xTranslation">0</label>
+					<input type="range" name="slider" value="0" min="-6" max="6" step="0.1" id="yTranslation" list="translation">
+					<label id="yTranslationValue" name="tag" for="yTranslation">0</label>
+					<input type="range" name="slider" value="0" min="-6" max="6" step="0.1" id="zTranslation" list="translation">
+					<label id="zTranslationValue" name="tag" for="zTranslation">0</label>
+					<p>Plane Rotation Control</p>
+					<input type="range" name="slider" value="0" min="0" max="90" step="any" id="xRotation" list="rotation">
+					<label id="xRotationValue" name="tag" for="xRotation">0</label>
+					<input type="range" name="slider" value="0" min="0" max="90" step="any" id="zRotation" list="rotation">
+					<label id="zRotationValue" name="tag" for="zRotation">0</label>
+					<datalist id="translation">
+						<option value="-5"></option>
+						<option value="0"></option>
+						<option value="5"></option>
+					</datalist>
+					<datalist id="rotation">
+						<option value="0"></option>
+						<option value="30"></option>
+						<option value="45"></option>
+						<option value="60"></option>
+						<option value="90"></option>
+					</datalist>
+				</div>
+				<div id="buttonList">
+					<p>Quick Operation Here:</p>
+					<input type="button" id="setCamera" value="观察截面">
+					<input type="button" id="resetButton" value="重置平面">
+					<input type="button" id="runAnimation" value="动一下">
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
