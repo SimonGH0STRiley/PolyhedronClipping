@@ -38,7 +38,8 @@ function main() {
 		
 		void main() {
 			vec3 normal = normalize(v_normal);
-			float light = abs(dot(normal, u_lightPosition));
+			vec3 lightNormal = normalize(u_lightPosition);
+			float light = abs(dot(normal, lightNormal));
 			gl_FragColor = v_color * u_colorMult;
 			gl_FragColor.rgb = gl_FragColor.rgb * light * gl_FragColor.a;
 			gl_FragColor.a = u_colorMult.a;
@@ -306,6 +307,58 @@ function main() {
 			xRotation: 0,
 			zRotation: 0,
 		}
+	});
+
+	document.getElementById("objColorRGB").addEventListener("input", (event) => {
+		const colorCode = event.target.value;
+		const r = parseInt(colorCode.slice(1, 3), 16);
+		const g = parseInt(colorCode.slice(3, 5), 16);
+		const b = parseInt(colorCode.slice(5, 7), 16);
+		objectUniforms.u_colorMult[0] = r / 255;
+		objectUniforms.u_colorMult[1] = g / 255;
+		objectUniforms.u_colorMult[2] = b / 255;
+	});
+
+	document.getElementById("objColorAlpha").addEventListener("input", (event) => {
+		objectUniforms.u_colorMult[3] = Number(event.target.value);
+	});
+
+	document.getElementById("planeColorRGB").addEventListener("input", (event) => {
+		const colorCode = event.target.value;
+		const r = parseInt(colorCode.slice(1, 3), 16);
+		const g = parseInt(colorCode.slice(3, 5), 16);
+		const b = parseInt(colorCode.slice(5, 7), 16);
+		planeUniforms.u_colorMult[0] = r / 255;
+		planeUniforms.u_colorMult[1] = g / 255;
+		planeUniforms.u_colorMult[2] = b / 255;
+	});
+
+	document.getElementById("planeColorAlpha").addEventListener("input", (event) => {
+		planeUniforms.u_colorMult[3] = Number(event.target.value);
+	});
+
+	document.getElementById("planeInnerColorRGB").addEventListener("input", (event) => {
+		const colorCode = event.target.value;
+		const r = parseInt(colorCode.slice(1, 3), 16);
+		const g = parseInt(colorCode.slice(3, 5), 16);
+		const b = parseInt(colorCode.slice(5, 7), 16);
+		planeInnerUniforms.u_colorMult[0] = r / 255;
+		planeInnerUniforms.u_colorMult[1] = g / 255;
+		planeInnerUniforms.u_colorMult[2] = b / 255;
+	});
+
+	document.getElementById("planeInnerColorAlpha").addEventListener("input", (event) => {
+		planeInnerUniforms.u_colorMult[3] = Number(event.target.value);
+	});
+
+	document.getElementById("lightX").addEventListener("input", (event) => {
+		lightPosition[0] = Number(event.target.value);
+	});
+	document.getElementById("lightY").addEventListener("input", (event) => {
+		lightPosition[1] = Number(event.target.value);
+	});
+	document.getElementById("lightZ").addEventListener("input", (event) => {
+		lightPosition[2] = Number(event.target.value);
 	});
 
 	let objectUniforms = {
