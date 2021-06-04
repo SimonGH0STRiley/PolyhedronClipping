@@ -132,7 +132,7 @@ function main() {
 	
 	const objectBufferInfo	= new Map ([
 		['cube',		primitives.createCubeWithVertexColorsBufferInfo(gl, 10)],
-		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 15, 9, 15, 9, 10)],
+		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 16, 10, 16, 10, 10)],
 		['slinder',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 5, 5, 10)],
 		['cone',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 0, 5, 10)],
 		['trun-cone',	primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 3, 7.5, 10)],
@@ -140,32 +140,31 @@ function main() {
 	]);
 	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());
 
+
+	// 与摄像机有关的常量
 	const cameraDistance		= 50;
 	const targetPosition		= [0, 0, 0];
 	const defaultCameraNormal	= m4.normalize([20, 20, 50]);
 	const upNormal				= [0, 1, 0];
-
-	const cameraAngleRadian	= degToRad(0);
-	const fieldOfViewRadian	= degToRad(60);
-	const cameraHeight		= 50;
-	const aspect			= gl.canvas.clientWidth / gl.canvas.clientHeight;
-	const horizontalOffset	= gl.canvas.clientWidth / 40;
-	const verticalOffset	= gl.canvas.clientHeight / 40;
-	const nearOffset		= 1;
-	const farOffset			= 2000;
-
-	const lightPosition		= m4.normalize([1, 2, 3]);
-	const objectTranslation	= [  0,  0,  0];
+	const horizontalOffset		= gl.canvas.clientWidth / 40;
+	const verticalOffset		= gl.canvas.clientHeight / 40;
+	const nearOffset			= 1;
+	const farOffset				= 2000;
+	// 与光源和物体有关的常量
+	const lightPosition			= m4.normalize([1, 2, 3]);
+	const objectLength			= 10;
+	const objectTranslation		= [  0,  0,  0];
 
 	let currentObjectKey = 'cube'; 
 	document.getElementById("objectList").addEventListener("change", () => {
-		const objectTypeList = document.getElementsByName("objectType");
-		objectTypeList.forEach((currObject) => {
-			if (currObject.checked) {
-				currentObjectKey = currObject.id;
+		document.getElementsByName("objectType").forEach((curr) => {
+			if (curr.checked) {
+				currentObjectKey = curr.id;
 				changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey));
 			}
 		});
+		document.getElementsByName("planeSelector").forEach((curr) => {curr.style.display = 'none';})
+		document.getElementById(currentObjectKey + "-plane").style.display = '';
 	});
 
 	let animationQueue = [
@@ -180,7 +179,7 @@ function main() {
 			}
 		}
 	];
-	let animationPlaying = true;
+	let animationPlaying = false;
 	let lastPlaneInfo = {
 		xTranslation: 0,
 		yTranslation: 0,
@@ -256,40 +255,62 @@ function main() {
 	});
 
 	let planeTransformMatrix = m4.identity();
+
+
+	//planeTransformMatrix = preplanes["tri-prism"].ordinaryPentagon(length);
+
 	let planeInfo = {
-		xTranslation: 0,
-		yTranslation: 0,
-		zTranslation: 0,
-		xRotation: 0,
-		zRotation: 0,
+		xTranslation:	0,
+		yTranslation:	0,
+		zTranslation:	0,
+		xRotation: 		0,
+		zRotation:		0,
 	};
-	function updatePlaneTransformMatrix(translateX, translateY, translateZ, rotateX, rotateZ) {
-		planeTransformMatrix = m4.translation(translateX, translateY, translateZ);
-		planeTransformMatrix = m4.xRotate(planeTransformMatrix, degToRad(rotateX));
-		planeTransformMatrix = m4.zRotate(planeTransformMatrix, degToRad(rotateZ));
+	function updatePlaneTransformMatrix(currPlaneInfo) {
+		planeTransformMatrix = m4.translation(currPlaneInfo.xTranslation, currPlaneInfo.yTranslation, currPlaneInfo.zTranslation);
+		planeTransformMatrix = m4.xRotate(planeTransformMatrix, degToRad(currPlaneInfo.xRotation));
+		planeTransformMatrix = m4.zRotate(planeTransformMatrix, degToRad(currPlaneInfo.zRotation));
+
 	}
+	document.getElementById("presetPlane").addEventListener("change", (event) => {
+		console.log(event.target.id)
+		console.log(event.target.value)
+		planeInfo = preplanes[currentObjectKey][event.target.value](objectLength);
+		console.log(planeInfo)
+		updatePlaneTransformMatrix(planeInfo);
+	})
 	document.getElementById("sliderList").addEventListener("input", (event) => {
 		const editProp = event.target.id;
 		const newValue = event.target.value;
 		planeInfo[editProp] = Number(newValue);
 		document.getElementById(editProp + "Value").textContent = newValue;
-		updatePlaneTransformMatrix(planeInfo.xTranslation, planeInfo.yTranslation, planeInfo.zTranslation, planeInfo.xRotation, planeInfo.zRotation);
+		updatePlaneTransformMatrix(planeInfo);
 	});
 
 
 	let cameraStatus = 0;
+	/*  cameraStatus:
+	 *		0: 从设置的摄像机视角观察物体
+	 *		1: 从切割平面正上方观察截面
+	 *		2: 从切割平面正下方观察截面
+	 */
 	let cameraNormal = defaultCameraNormal;
 	document.getElementById("setCamera").addEventListener("click", () => {
 		cameraStatus = ++cameraStatus % 3;
 		if (cameraStatus !== 0) {
+			// 观察平面
 			document.getElementById("resetButton").style.display = 'none';
 			const planeNormal = m4.transformVector(m4.inverse(m4.transpose(planeTransformMatrix)), m4.createVec4FromValues(0, 1, 0, 0));
 			cameraNormal = (cameraStatus === 1) ? m4.normalize(planeNormal.slice(0, 3)) : m4.normalize(m4.reverseVec3(planeNormal.slice(0, 3)))
 			if (Math.abs(cameraNormal[1]) === 1) {
+				// dirty trick
+				// 当摄像机位置在y轴上时 则与upNormal重合 无法通过向量外积计算x轴
+				// 因此将摄像机z轴位置微调一点点为0.0001 使得摄像机位置偏离y轴即可
 				cameraNormal[2] = 1e-4;
 				cameraNormal = m4.normalize(cameraNormal);
 			}
 		} else {
+			// 复位摄像机
 			document.getElementById("resetButton").style.display = '';
 			cameraNormal = defaultCameraNormal;
 		}
@@ -582,11 +603,10 @@ function main() {
 		const cameraMatrix		= m4.lookAt(m4.multiplyVec3(cameraNormal, cameraDistance), targetPosition, upNormal);
 		const viewMatrix		= m4.inverse(cameraMatrix);
 		const projectionMatrix 	= m4.orthographic(-horizontalOffset, horizontalOffset, -verticalOffset, verticalOffset, nearOffset, farOffset);
-		
 		const viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
 		const viewNormalMatrix	= m4.normalFromMat4(viewMatrix);
 
-		const clippingPlane	= m4.transformVector(m4.inverse(m4.transpose(planeTransformMatrix)), m4.createVec4FromValues(0, 1, 0, 0));
+		const clippingPlane		= m4.transformVector(m4.inverse(m4.transpose(planeTransformMatrix)), m4.createVec4FromValues(0, 1, 0, 0));
 
 		// 计算动画
 		const objectRotation	=  [ 0,  0,  0];
