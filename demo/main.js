@@ -652,7 +652,7 @@ function main() {
 					}
 					if (nextAnimation.cameraInfo) {
 						const middleCameraInfo = animationInterpolate(lastAnimation.cameraInfo, nextAnimation.cameraInfo, timePercentage, nextAnimation.interpolateFunc);
-						console.log(middleCameraInfo);
+						// console.log(middleCameraInfo);
 						cameraNormal = m4.cloneVec3(angleToVector(middleCameraInfo.rotateTheta, middleCameraInfo.rotatePhi));
 						
 						if (Math.abs(cameraNormal[1]) === 1) {
@@ -663,7 +663,7 @@ function main() {
 				}
 				// TODO: 同步数值变化到界面
 				// console.log(JSON.stringify(planeInfo));
-				updatePlaneTransformMatrix(planeInfo.xTranslation, planeInfo.yTranslation, planeInfo.zTranslation, planeInfo.xRotation, planeInfo.zRotation);
+				updatePlaneTransformMatrix(planeInfo);
 			}
 			
 		}
