@@ -141,7 +141,8 @@ function main() {
 	]);
 	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());
 
-	const cameraDistance		= 50;
+	const cameraDistance		= 20;
+	const cameraScale			= 1000;
 	const targetPosition		= [0, 0, 0];
 	const defaultCameraNormal	= m4.normalize([20, 20, 50]);
 	const upNormal				= [0, 1, 0];
@@ -150,8 +151,8 @@ function main() {
 	const fieldOfViewRadian	= degToRad(60);
 	const cameraHeight		= 50;
 	const aspect			= gl.canvas.clientWidth / gl.canvas.clientHeight;
-	const horizontalOffset	= gl.canvas.clientWidth / 40;
-	const verticalOffset	= gl.canvas.clientHeight / 40;
+	const horizontalOffset	= gl.canvas.clientWidth * cameraDistance /  cameraScale;
+	const verticalOffset	= gl.canvas.clientHeight * cameraDistance / cameraScale;
 	const nearOffset		= 1;
 	const farOffset			= 2000;
 
@@ -311,6 +312,7 @@ function main() {
 
 	document.getElementById("objColorRGB").addEventListener("input", (event) => {
 		const colorCode = event.target.value;
+		document.getElementById("objColorRGBValue").textContent = colorCode;
 		const r = parseInt(colorCode.slice(1, 3), 16);
 		const g = parseInt(colorCode.slice(3, 5), 16);
 		const b = parseInt(colorCode.slice(5, 7), 16);
@@ -320,11 +322,13 @@ function main() {
 	});
 
 	document.getElementById("objColorAlpha").addEventListener("input", (event) => {
+		document.getElementById("objColorAlphaValue").textContent = event.target.value;
 		objectUniforms.u_colorMult[3] = Number(event.target.value);
 	});
 
 	document.getElementById("planeColorRGB").addEventListener("input", (event) => {
 		const colorCode = event.target.value;
+		document.getElementById("planeColorRGBValue").textContent = colorCode;
 		const r = parseInt(colorCode.slice(1, 3), 16);
 		const g = parseInt(colorCode.slice(3, 5), 16);
 		const b = parseInt(colorCode.slice(5, 7), 16);
@@ -334,11 +338,13 @@ function main() {
 	});
 
 	document.getElementById("planeColorAlpha").addEventListener("input", (event) => {
+		document.getElementById("planeColorAlphaValue").textContent = event.target.value;
 		planeUniforms.u_colorMult[3] = Number(event.target.value);
 	});
 
 	document.getElementById("planeInnerColorRGB").addEventListener("input", (event) => {
 		const colorCode = event.target.value;
+		document.getElementById("planeInnerColorRGBValue").textContent = colorCode;
 		const r = parseInt(colorCode.slice(1, 3), 16);
 		const g = parseInt(colorCode.slice(3, 5), 16);
 		const b = parseInt(colorCode.slice(5, 7), 16);
@@ -348,16 +354,20 @@ function main() {
 	});
 
 	document.getElementById("planeInnerColorAlpha").addEventListener("input", (event) => {
+		document.getElementById("planeInnerColorAlphaValue").textContent = event.target.value;
 		planeInnerUniforms.u_colorMult[3] = Number(event.target.value);
 	});
 
 	document.getElementById("lightX").addEventListener("input", (event) => {
+		document.getElementById("lightXValue").textContent = event.target.value;
 		lightPosition[0] = Number(event.target.value);
 	});
 	document.getElementById("lightY").addEventListener("input", (event) => {
+		document.getElementById("lightYValue").textContent = event.target.value;
 		lightPosition[1] = Number(event.target.value);
 	});
 	document.getElementById("lightZ").addEventListener("input", (event) => {
+		document.getElementById("lightZValue").textContent = event.target.value;
 		lightPosition[2] = Number(event.target.value);
 	});
 
