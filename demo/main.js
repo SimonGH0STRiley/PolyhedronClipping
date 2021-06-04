@@ -41,7 +41,8 @@ function main() {
 			vec3 lightNormal = normalize(u_lightPosition);
 			float light = abs(dot(normal, lightNormal));
 			gl_FragColor = v_color * u_colorMult;
-			gl_FragColor.rgb = gl_FragColor.rgb * light * gl_FragColor.a;
+			// gl_FragColor.rgb = gl_FragColor.rgb * light * gl_FragColor.a;
+			gl_FragColor.rgb = gl_FragColor.rgb + (vec3(1.0, 1.0, 1.0) - gl_FragColor.rgb) * light - 0.1; 
 			gl_FragColor.a = u_colorMult.a;
 		}
 	`;
@@ -133,7 +134,7 @@ function main() {
 	
 	const objectBufferInfo	= new Map ([
 		['cube',		primitives.createCubeWithVertexColorsBufferInfo(gl, 10)],
-		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 15, 9, 15, 9, 10)],
+		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 16, 10, 16, 10, 10)],
 		['slinder',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 5, 5, 10)],
 		['cone',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 0, 5, 10)],
 		['trun-cone',	primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 3, 7.5, 10)],
@@ -157,47 +158,109 @@ function main() {
 	const farOffset			= 2000;
 
 	const lightPosition		= m4.normalize([1, 2, 3]);
+	const objectLength			= 10;
 	const objectTranslation	= [  0,  0,  0];
 
 	let currentObjectKey = 'cube'; 
 	document.getElementById("objectList").addEventListener("change", () => {
-		const objectTypeList = document.getElementsByName("objectType");
-		objectTypeList.forEach((currObject) => {
-			if (currObject.checked) {
-				currentObjectKey = currObject.id;
+		document.getElementsByName("objectType").forEach((curr) => {
+			if (curr.checked) {
+				currentObjectKey = curr.id;
 				changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey));
 			}
 		});
+		document.getElementsByName("planeSelector").forEach((curr) => {curr.style.display = 'none';})
+		document.getElementById(currentObjectKey + "-plane").style.display = '';
 	});
 
-	let animationQueue = [
-		{
-			duration: 1000,
-			planeInfo: {
-				xTranslation: 0,
-				yTranslation: 0,
-				zTranslation: 0,
-				xRotation: 30,
-				zRotation: 45,
-			}
+	let animationQueue = [];
+	let animationPlaying = false;
+	let lastAnimation = {
+		planeInfo: {
+			xTranslation: 0,
+			yTranslation: 0,
+			zTranslation: 0,
+			xRotation: 0,
+			zRotation: 0,
+		},
+		cameraInfo: {
+			rotateTheta: 0,
+			rotatePhi: 0,
 		}
-	];
-	let animationPlaying = true;
-	let lastPlaneInfo = {
-		xTranslation: 0,
-		yTranslation: 0,
-		zTranslation: 0,
-		xRotation: 0,
-		zRotation: 0,
 	};
 	let animationTime = 0;
 	let animationLastTimestamp;
+
+	function interpolateLinear(from, to, percent) {
+		return from * (1 - percent) + to * percent;
+	}
+
+	function interpolateSquare(from, to, percent) {
+		// Ease out square
+		return from + (to - from) * (1 - Math.pow(percent - 1, 2));
+	}
+
+	function interpolateSine(from, to, percent) {
+		// Ease out sine
+		return from + (to - from) * Math.sin(percent * Math.PI / 2);
+	}
+
+	function interpolateCubic(from, to, percent) {
+		// Ease out cubic
+		return from + (to - from) * (1 + Math.pow(percent - 1, 3));
+	}
+
+	function computeNormalAnimation(vFrom, vTo) {
+		const thetaFrom = Math.acos(vFrom[1]);
+		const thetaTo = Math.acos(vTo[1]);
+		let phiFrom, phiTo;
+		let thetaFromSin = Math.sin(thetaFrom), thetaToSin = Math.sin(thetaTo);
+		if (thetaFromSin === 0 && thetaToSin === 0) {
+			// Any direction should work
+			phiFrom = phiTo = 0;
+		/*
+		} else if (thetaFromSin === 0) {
+			// Follow vTo
+			phiFrom = phiTo = Math.atan2(vTo[0] / thetaToSin, vTo[2] / thetaToSin);
+		} else if (thetaToSin === 0) {
+			// Follow vFrom
+			phiFrom = phiTo = Math.atan2(vFrom[0] / thetaFromSin, vFrom[2] / thetaFromSin);
+		*/
+		} else {
+			phiFrom = Math.atan2(vFrom[0] / thetaFromSin, vFrom[2] / thetaFromSin);
+			phiTo = Math.atan2(vTo[0] / thetaToSin, vTo[2] / thetaToSin);
+		}
+		if (phiTo - phiFrom > Math.PI) {
+			phiFrom += Math.PI * 2;
+		} else if (phiTo - phiFrom < -Math.PI) {
+			phiFrom -= Math.PI * 2;
+		}
+		return {
+			from: {
+				rotateTheta: thetaFrom,
+				rotatePhi: phiFrom,
+			},
+			to: {
+				rotateTheta: thetaTo,
+				rotatePhi: phiTo,
+			}
+		};
+	}
+
+	function angleToVector(theta, phi) {
+		return [
+			Math.sin(theta) * Math.sin(phi),
+			Math.cos(theta),
+			Math.sin(theta) * Math.cos(phi),
+		]
+	}
+
 	function animationInterpolate(from, to, timePercentage, interpolateFunc) {
 		if (!interpolateFunc || !interpolateFunc.call) {
 			// Fallback to linear interpolation
 			if (interpolateFunc)
 				console.warn("Animation: Fallback to linear interpolation")
-			interpolateFunc = (fromValue, toValue, timePercentage) => fromValue * (1 - timePercentage) + toValue * timePercentage;
+			interpolateFunc = interpolateLinear;
 		}
 		let result = {};
 		for (let prop in from) {
@@ -218,10 +281,7 @@ function main() {
 					xRotation: 0,
 					zRotation: 0,
 				},
-				interpolateFunc: function (from, to, percent) {
-					// Ease out square
-					return from + (to - from) * (1 - Math.pow(percent - 1, 2));
-				}
+				interpolateFunc: interpolateSquare,
 			},
 			{
 				duration: 1000,
@@ -232,10 +292,7 @@ function main() {
 					xRotation: 90,
 					zRotation: 90,
 				},
-				interpolateFunc: function (from, to, percent) {
-					// Ease out sine
-					return from + (to - from) * Math.sin(percent * Math.PI / 2);
-				}
+				interpolateFunc: interpolateSine,
 			},
 			{
 				duration: 1000,
@@ -246,54 +303,88 @@ function main() {
 					xRotation: 30,
 					zRotation: 45,
 				},
-				interpolateFunc: function (from, to, percent) {
-					// Ease out cubic
-					return from + (to - from) * (1 + Math.pow(percent - 1, 3));
-				}
+				interpolateFunc: interpolateCubic,
 			}
 		]);
-		Object.assign(lastPlaneInfo, planeInfo);
+		Object.assign(lastAnimation.planeInfo, planeInfo);
 		animationLastTimestamp = performance.now();
 		animationPlaying = true;
 	});
 
 	let planeTransformMatrix = m4.identity();
+
+
+	//planeTransformMatrix = preplanes["tri-prism"].ordinaryPentagon(length);
+
 	let planeInfo = {
-		xTranslation: 0,
-		yTranslation: 0,
-		zTranslation: 0,
-		xRotation: 0,
-		zRotation: 0,
+		xTranslation:	0,
+		yTranslation:	0,
+		zTranslation:	0,
+		xRotation: 		0,
+		zRotation:		0,
 	};
-	function updatePlaneTransformMatrix(translateX, translateY, translateZ, rotateX, rotateZ) {
-		planeTransformMatrix = m4.translation(translateX, translateY, translateZ);
-		planeTransformMatrix = m4.xRotate(planeTransformMatrix, degToRad(rotateX));
-		planeTransformMatrix = m4.zRotate(planeTransformMatrix, degToRad(rotateZ));
+	function updatePlaneTransformMatrix(currPlaneInfo) {
+		planeTransformMatrix = m4.translation(currPlaneInfo.xTranslation, currPlaneInfo.yTranslation, currPlaneInfo.zTranslation);
+		planeTransformMatrix = m4.xRotate(planeTransformMatrix, degToRad(currPlaneInfo.xRotation));
+		planeTransformMatrix = m4.zRotate(planeTransformMatrix, degToRad(currPlaneInfo.zRotation));
+
 	}
+	document.getElementById("presetPlane").addEventListener("change", (event) => {
+		console.log(event.target.id)
+		console.log(event.target.value)
+		planeInfo = preplanes[currentObjectKey][event.target.value](objectLength);
+		console.log(planeInfo)
+		updatePlaneTransformMatrix(planeInfo);
+	})
 	document.getElementById("sliderList").addEventListener("input", (event) => {
 		const editProp = event.target.id;
 		const newValue = event.target.value;
 		planeInfo[editProp] = Number(newValue);
 		document.getElementById(editProp + "Value").textContent = newValue;
-		updatePlaneTransformMatrix(planeInfo.xTranslation, planeInfo.yTranslation, planeInfo.zTranslation, planeInfo.xRotation, planeInfo.zRotation);
+		updatePlaneTransformMatrix(planeInfo);
 	});
 
 
 	let cameraStatus = 0;
+	/*  cameraStatus:
+	 *		0: 从设置的摄像机视角观察物体
+	 *		1: 从切割平面正上方观察截面
+	 *		2: 从切割平面正下方观察截面
+	 */
 	let cameraNormal = defaultCameraNormal;
 	document.getElementById("setCamera").addEventListener("click", () => {
 		cameraStatus = ++cameraStatus % 3;
 		if (cameraStatus !== 0) {
+			// 观察平面
 			document.getElementById("resetButton").style.display = 'none';
 			const planeNormal = m4.transformVector(m4.inverse(m4.transpose(planeTransformMatrix)), m4.createVec4FromValues(0, 1, 0, 0));
-			cameraNormal = (cameraStatus === 1) ? m4.normalize(planeNormal.slice(0, 3)) : m4.normalize(m4.reverseVec3(planeNormal.slice(0, 3)))
-			if (Math.abs(cameraNormal[1]) === 1) {
-				cameraNormal[2] = 1e-4;
-				cameraNormal = m4.normalize(cameraNormal);
+			let cameraNormalDst = (cameraStatus === 1) ? m4.normalize(planeNormal.slice(0, 3)) : m4.normalize(m4.reverseVec3(planeNormal.slice(0, 3)))
+			if (Math.abs(cameraNormalDst[1]) === 1) {
+				// dirty trick
+				// 当摄像机位置在y轴上时 则与upNormal重合 无法通过向量外积计算x轴
+				// 因此将摄像机z轴位置微调一点点为0.0001 使得摄像机位置偏离y轴即可
+				cameraNormalDst[2] = 1e-3;
+				cameraNormalDst = m4.normalize(cameraNormalDst);
 			}
+			let normalAnimation = computeNormalAnimation(cameraNormal, cameraNormalDst);
+			lastAnimation.cameraInfo = normalAnimation.from;
+			animationQueue.push({
+				duration: 500,
+				cameraInfo: normalAnimation.to,
+				interpolateFunc: interpolateSquare,
+			})
+			animationPlaying = true;
 		} else {
+			// 复位摄像机
 			document.getElementById("resetButton").style.display = '';
-			cameraNormal = defaultCameraNormal;
+			let normalAnimation = computeNormalAnimation(cameraNormal, defaultCameraNormal);
+			lastAnimation.cameraInfo = normalAnimation.from;
+			animationQueue.push({
+				duration: 500,
+				cameraInfo: normalAnimation.to,
+				interpolateFunc: interpolateSquare,
+			})
+			animationPlaying = true;
 		}
 		
 	});
@@ -600,8 +691,19 @@ function main() {
 				if (elapsedTime >= nextAnimation.duration) {
 					// Finish one animation
 					animationTime = 0;
-					Object.assign(planeInfo, nextAnimation.planeInfo);
-					Object.assign(lastPlaneInfo, planeInfo);
+					if (nextAnimation.planeInfo) {
+						Object.assign(planeInfo, nextAnimation.planeInfo);
+						Object.assign(lastAnimation.planeInfo, planeInfo);
+					}
+					if (nextAnimation.cameraInfo) {
+						cameraNormal = m4.cloneVec3(angleToVector(nextAnimation.cameraInfo.rotateTheta, nextAnimation.cameraInfo.rotatePhi));
+						
+						if (Math.abs(cameraNormal[1]) === 1) {
+							cameraNormal[2] = 1e-4;
+							cameraNormal = m4.normalize(cameraNormal);
+						}
+						Object.assign(lastAnimation.cameraInfo, nextAnimation.cameraInfo);
+					}
 					animationQueue.shift();
 					if (animationQueue.length === 0) {
 						console.info("Animation: Animations end")
@@ -611,12 +713,24 @@ function main() {
 				} else {
 					animationTime = elapsedTime;
 					const timePercentage = elapsedTime / nextAnimation.duration;
-					const middlePlaneInfo = animationInterpolate(lastPlaneInfo, nextAnimation.planeInfo, timePercentage, nextAnimation.interpolateFunc);
-					Object.assign(planeInfo, middlePlaneInfo);
+					if (nextAnimation.planeInfo) {
+						const middlePlaneInfo = animationInterpolate(lastAnimation.planeInfo, nextAnimation.planeInfo, timePercentage, nextAnimation.interpolateFunc);
+						Object.assign(planeInfo, middlePlaneInfo);
+					}
+					if (nextAnimation.cameraInfo) {
+						const middleCameraInfo = animationInterpolate(lastAnimation.cameraInfo, nextAnimation.cameraInfo, timePercentage, nextAnimation.interpolateFunc);
+						// console.log(middleCameraInfo);
+						cameraNormal = m4.cloneVec3(angleToVector(middleCameraInfo.rotateTheta, middleCameraInfo.rotatePhi));
+						
+						if (Math.abs(cameraNormal[1]) === 1) {
+							cameraNormal[2] = 1e-4;
+							cameraNormal = m4.normalize(cameraNormal);
+						}
+					}
 				}
 				// TODO: 同步数值变化到界面
 				// console.log(JSON.stringify(planeInfo));
-				updatePlaneTransformMatrix(planeInfo.xTranslation, planeInfo.yTranslation, planeInfo.zTranslation, planeInfo.xRotation, planeInfo.zRotation);
+				updatePlaneTransformMatrix(planeInfo);
 			}
 			
 		}
@@ -645,11 +759,10 @@ function main() {
 		const cameraMatrix		= m4.lookAt(m4.multiplyVec3(cameraNormal, cameraDistance), targetPosition, upNormal);
 		const viewMatrix		= m4.inverse(cameraMatrix);
 		const projectionMatrix 	= m4.orthographic(-horizontalOffset, horizontalOffset, -verticalOffset, verticalOffset, nearOffset, farOffset);
-		
 		const viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
 		const viewNormalMatrix	= m4.normalFromMat4(viewMatrix);
 
-		const clippingPlane	= m4.transformVector(m4.inverse(m4.transpose(planeTransformMatrix)), m4.createVec4FromValues(0, 1, 0, 0));
+		const clippingPlane		= m4.transformVector(m4.inverse(m4.transpose(planeTransformMatrix)), m4.createVec4FromValues(0, 1, 0, 0));
 
 		// 计算动画
 		const objectRotation	=  [ 0,  0,  0];

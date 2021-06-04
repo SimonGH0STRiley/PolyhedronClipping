@@ -396,13 +396,13 @@
 	 * Creates the vertices and indices for a cube. The
 	 * cube will be created around the origin. (-size / 2, size / 2)
 	 *
-	 * @param {number} size Width, height and depth of the cube.
+	 * @param {number} length Width, height and depth of the cube.
 	 * @return {Object.<string, TypedArray>} The
 	 *         created plane vertices.
 	 * @memberOf module:primitives
 	 */
-	function createCubeVertices(size) {
-		const k = size / 2;
+	function createCubeVertices(length) {
+		const k = length / 2;
 
 		const cornerVertices = [
 			[-k, -k, -k],

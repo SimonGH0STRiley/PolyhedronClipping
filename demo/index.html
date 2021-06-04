@@ -7,6 +7,7 @@
 		<script src="./src/m4.js"></script>
 		<script src="./src/webgl-utils.js"></script>
 		<script src="./src/primitives.js"></script>
+		<script src="./src/preset-planes.js"></script>
 		<script src="main.js" defer></script>
 	</head>
 
@@ -29,26 +30,102 @@
 					<input type="radio" name="objectType" id="tri-prism">
 					<label for="tri-prism">Triangular Prism</label>
 				</div>
+				<div id="presetPlane">
+					<p>Choose Preset Planes Here Below:</p>
+					<select name="planeSelector" id="cube-plane">
+						<option value="" selected>--Choose plane here--</option>
+						<option value="isoscelesTriangle">等腰三角形</option>
+						<option value="equilateralTriangle">等边三角形</option>
+						<option value="acuteTriangle">锐角三角形</option>
+						<option value="prismatic">菱形</option>
+						<option value="isoscelesTrapezoid">等腰梯形</option>
+						<option value="ordinaryTrapezoid">普通梯形</option>
+						<option value="square1">正方形</option>
+						<option value="square2">正方形</option>
+						<option value="rectangle1">长方形</option>
+						<option value="rectangle2">长方形</option>
+						<option value="rectangle3">长方形</option>
+						<option value="parallelogram">平行四边形</option>
+						<option value="ordinaryPentagon">不规则五边形</option>
+						<option value="ordinaryHexagon">不规则六边形</option>
+						<option value="regularHexagon">正六边形</option>
+					</select>
+					<select name="planeSelector" id="prism-plane" style="display: none;">
+						<option value="" selected>--Choose plane here--</option>
+						<option value="isoscelesTriangle">等腰三角形</option>
+						<option value="equilateralTriangle">等边三角形</option>
+						<option value="prismatic">菱形</option>
+						<option value="isoscelesTrapezoid">等腰梯形</option>
+						<option value="ordinaryTrapezoid">普通梯形</option>
+						<option value="square">正方形</option>
+						<option value="rectangle1">长方形</option>
+						<option value="rectangle2">长方形</option>
+						<option value="rectangle3">长方形</option>
+						<option value="rectangle4">长方形</option>
+						<option value="parallelogram">平行四边形</option>
+						<option value="ordinaryPentagon">不规则五边形</option>
+						<option value="ordinaryHexagon">不规则六边形</option>
+					</select>
+					<select name="planeSelector" id="slinder-plane" style="display: none;">
+						<option value="" selected>--Choose plane here--</option>
+						<option value="circle">圆</option>
+						<option value="ellipse">椭圆</option>
+						<option value="curveStraight1">曲线+直线</option>
+						<option value="curveStraight2">曲线+直线</option>
+						<option value="rectangle1">矩形</option>
+						<option value="rectangle2">矩形</option>
+						<option value="drumShape">鼓形</option>
+					</select>
+					<select name="planeSelector" id="cone-plane" style="display: none;">
+						<option value="" selected>--Choose plane here--</option>
+						<option value="circle">圆</option>
+						<option value="ellipse">椭圆</option>
+						<option value="curveStraight">曲线+直线</option>
+						<option value="isoscelesTriangle">等腰三角形</option>
+					</select>
+					<select name="planeSelector" id="trun-cone-plane" style="display: none;">
+						<option value="" selected>--Choose plane here--</option>
+						<option value="circle">圆</option>
+						<option value="ellipse">椭圆</option>
+						<option value="curveStraight">曲线+直线</option>
+						<option value="isoscelesTrapezoid">等腰梯形</option>
+					</select>
+					<select name="planeSelector" id="tri-prism-plane" style="display: none;">
+						<option value="" selected>--Choose plane here--</option>
+						<option value="triangle1">三角形1</option>
+						<option value="triangle2">三角形2</option>
+						<option value="rectangle1">矩形</option>
+						<option value="rectangle2">矩形</option>
+						<option value="trapezoid">梯形</option>
+						<option value="ordinaryPentagon">五边形</option>
+					</select>
+				</div>
 				<div id="sliderList">
-					<p>Adjust Slider Here:</p>
+					<p>Adjust Slider Here Below:</p>
 					<p>Plane Translation Control</p>
-					<input type="range" name="slider" value="0" min="-6" max="6" step="0.1" id="xTranslation" list="translation">
+					<input type="range" name="slider" value="0" min="-10" max="10" step="0.1" id="xTranslation" list="translation">
 					<label id="xTranslationValue" name="tag" for="xTranslation">0</label>
-					<input type="range" name="slider" value="0" min="-6" max="6" step="0.1" id="yTranslation" list="translation">
+					<input type="range" name="slider" value="0" min="-10" max="10" step="0.1" id="yTranslation" list="translation">
 					<label id="yTranslationValue" name="tag" for="yTranslation">0</label>
-					<input type="range" name="slider" value="0" min="-6" max="6" step="0.1" id="zTranslation" list="translation">
+					<input type="range" name="slider" value="0" min="-10" max="10" step="0.1" id="zTranslation" list="translation">
 					<label id="zTranslationValue" name="tag" for="zTranslation">0</label>
 					<p>Plane Rotation Control</p>
-					<input type="range" name="slider" value="0" min="0" max="90" step="any" id="xRotation" list="rotation">
+					<input type="range" name="slider" value="0" min="-90" max="90" step="any" id="xRotation" list="rotation">
 					<label id="xRotationValue" name="tag" for="xRotation">0</label>
-					<input type="range" name="slider" value="0" min="0" max="90" step="any" id="zRotation" list="rotation">
+					<input type="range" name="slider" value="0" min="-90" max="90" step="any" id="zRotation" list="rotation">
 					<label id="zRotationValue" name="tag" for="zRotation">0</label>
 					<datalist id="translation">
+						<option value="-8"></option>
 						<option value="-5"></option>
 						<option value="0"></option>
 						<option value="5"></option>
+						<option value="8"></option>
 					</datalist>
 					<datalist id="rotation">
+						<option value="-90"></option>
+						<option value="-60"></option>
+						<option value="-45"></option>
+						<option value="-30"></option>
 						<option value="0"></option>
 						<option value="30"></option>
 						<option value="45"></option>
@@ -57,7 +134,7 @@
 					</datalist>
 				</div>
 				<div id="buttonList">
-					<p>Quick Operation Here:</p>
+					<p>Quick Operation Here Below:</p>
 					<input type="button" id="setCamera" value="观察截面">
 					<input type="button" id="resetButton" value="重置平面">
 					<input type="button" id="runAnimation" value="动一下">
