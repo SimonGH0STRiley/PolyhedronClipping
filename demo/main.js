@@ -163,7 +163,11 @@ function main() {
 				changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey));
 			}
 		});
-		document.getElementsByName("planeSelector").forEach((curr) => {curr.style.display = 'none';})
+		animateTransform('plane', 500, preplanes[currentObjectKey]['default'](objectLength), interpolateSquare);
+		document.getElementsByName("planeSelector").forEach((curr) => {
+			curr.firstElementChild.selected = 'true';
+			curr.style.display = 'none';
+		})
 		document.getElementById(currentObjectKey + "-plane").style.display = '';
 	});
 
@@ -246,7 +250,7 @@ function main() {
 			Math.sin(theta) * Math.sin(phi),
 			Math.cos(theta),
 			Math.sin(theta) * Math.cos(phi),
-		]
+		];
 	}
 
 	function animationInterpolate(from, to, timePercentage, interpolateFunc) {
@@ -264,51 +268,25 @@ function main() {
 		}
 		return result;
 	}
-	document.getElementById("runAnimation").addEventListener("click", () => {
-		animationQueue = animationQueue.concat([
-			{
-				duration: 1000,
-				planeInfo: {
-					xTranslation: 0,
-					yTranslation: 4,
-					zTranslation: 0,
-					xRotation: 0,
-					zRotation: 0,
-				},
-				interpolateFunc: interpolateSquare,
-			},
-			{
-				duration: 1000,
-				planeInfo: {
-					xTranslation: 2,
-					yTranslation: 0,
-					zTranslation: 0,
-					xRotation: 90,
-					zRotation: 90,
-				},
-				interpolateFunc: interpolateSine,
-			},
-			{
-				duration: 1000,
-				planeInfo: {
-					xTranslation: 0,
-					yTranslation: 0,
-					zTranslation: 0,
-					xRotation: 30,
-					zRotation: 45,
-				},
-				interpolateFunc: interpolateCubic,
-			}
-		]);
-		Object.assign(lastAnimation.PlaneInfo, planeInfo);
-		animationLastTimestamp = performance.now();
+
+	function animateTransform(type, duration, info, interpolateFunc) {
+		if (type === 'plane') {
+			animationQueue.push({
+				duration: duration,
+				planeInfo: info,
+				interpolateFunc: interpolateFunc
+			});
+		} else if (type === 'camera') {
+			animationQueue.push({
+				duration: duration,
+				cameraInfo: info,
+				interpolateFunc: interpolateFunc
+			});
+		}
 		animationPlaying = true;
-	});
+	}
 
 	let planeTransformMatrix = m4.identity();
-
-
-	//planeTransformMatrix = preplanes["tri-prism"].ordinaryPentagon(length);
 
 	let planeInfo = {
 		xTranslation:	0,
@@ -321,14 +299,9 @@ function main() {
 		planeTransformMatrix = m4.translation(currPlaneInfo.xTranslation, currPlaneInfo.yTranslation, currPlaneInfo.zTranslation);
 		planeTransformMatrix = m4.xRotate(planeTransformMatrix, degToRad(currPlaneInfo.xRotation));
 		planeTransformMatrix = m4.zRotate(planeTransformMatrix, degToRad(currPlaneInfo.zRotation));
-
 	}
 	document.getElementById("presetPlane").addEventListener("change", (event) => {
-		console.log(event.target.id)
-		console.log(event.target.value)
-		planeInfo = preplanes[currentObjectKey][event.target.value](objectLength);
-		console.log(planeInfo)
-		updatePlaneTransformMatrix(planeInfo);
+		animateTransform('plane', 500, preplanes[currentObjectKey][event.target.value](objectLength), interpolateSquare);
 	})
 	document.getElementById("sliderList").addEventListener("input", (event) => {
 		const editProp = event.target.id;
@@ -356,43 +329,31 @@ function main() {
 			if (Math.abs(cameraNormalDst[1]) === 1) {
 				// dirty trick
 				// 当摄像机位置在y轴上时 则与upNormal重合 无法通过向量外积计算x轴
-				// 因此将摄像机z轴位置微调一点点为0.0001 使得摄像机位置偏离y轴即可
+				// 因此将摄像机z轴位置微调一点点为0.001 使得摄像机位置偏离y轴即可
 				cameraNormalDst[2] = 1e-3;
 				cameraNormalDst = m4.normalize(cameraNormalDst);
 			}
 			let normalAnimation = computeNormalAnimation(cameraNormal, cameraNormalDst);
 			lastAnimation.cameraInfo = normalAnimation.from;
-			animationQueue.push({
-				duration: 500,
-				cameraInfo: normalAnimation.to,
-				interpolateFunc: interpolateSquare,
-			})
-			animationPlaying = true;
+			animateTransform('camera', 500, normalAnimation.to, interpolateSquare);
 		} else {
 			// 复位摄像机
 			document.getElementById("resetButton").style.display = '';
 			let normalAnimation = computeNormalAnimation(cameraNormal, defaultCameraNormal);
 			lastAnimation.cameraInfo = normalAnimation.from;
-			animationQueue.push({
-				duration: 500,
-				cameraInfo: normalAnimation.to,
-				interpolateFunc: interpolateSquare,
-			})
-			animationPlaying = true;
+			animateTransform('camera', 500, normalAnimation.to, interpolateSquare);
 		}
 		
 	});
 	document.getElementById("resetButton").addEventListener("click", () => {
+		animateTransform('plane', 500, preplanes[currentObjectKey]['default'](objectLength), interpolateSquare);
+		document.getElementsByName("planeSelector").forEach((curr) => {
+			if (curr.id === currentObjectKey + '-plane') {
+				curr.firstElementChild.selected = 'true';
+			}
+		})
 		document.getElementsByName("slider").forEach(function (currDiv) {currDiv.value = 0});
 		document.getElementsByName("tag").forEach(function (currDiv) {currDiv.textContent = 0});
-		planeTransformMatrix = m4.identity();
-		planeInfo = {
-			xTranslation: 0,
-			yTranslation: 0,
-			zTranslation: 0,
-			xRotation: 0,
-			zRotation: 0,
-		}
 	});
 
 	let objectUniforms = {

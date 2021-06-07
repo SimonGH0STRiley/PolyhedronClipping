@@ -13,9 +13,15 @@
 } (this, function() {
     "use strict";
 
-
 	function radToDeg (r) {
 		return r * 180 / Math.PI;
+	}
+
+	function defaultPlane (length) {
+		return {
+			xTranslation:	0,	yTranslation: 	0,	zTranslation:	0,
+			xRotation:		0,	zRotation:		0
+		}
 	}
 
 	function cubeIsoscelesTriangle (length) {
@@ -573,7 +579,8 @@
 			parallelogram:		 cubeParallelogram,
 			ordinaryPentagon:	 cubeOrdinaryPentagon,
 			ordinaryHexagon:	 cubeOrdinaryHexagon,
-			regularHexagon:		 cubeRegularHexagon
+			regularHexagon:		 cubeRegularHexagon,
+			default:			 defaultPlane
 		},
 		"prism": {
 			isoscelesTriangle:	 prismIsoscelesTriangle,
@@ -588,36 +595,41 @@
 			rectangle4:			 prismRectangle4,
 			parallelogram:		 prismParallelogram,
 			ordinaryPentagon:	 prismOrdinaryPentagon,
-			ordinaryHexagon:	 prismOrdinaryHexagon
+			ordinaryHexagon:	 prismOrdinaryHexagon,
+			default:			 defaultPlane
 		},
 		"slinder": {
-			circle: 			slinderCircle,
-			ellipse:			slinderEllipse,
-			curveStraight1:		slinderCurveStraight1,
-			curveStraight2:		slinderCurveStraight2,
-			rectangle1:			slinderRectangle1,
-			rectangle2:			slinderRectangle2,
-			drumShape:			slinderDrumShape
+			circle: 			 slinderCircle,
+			ellipse:			 slinderEllipse,
+			curveStraight1:		 slinderCurveStraight1,
+			curveStraight2:		 slinderCurveStraight2,
+			rectangle1:			 slinderRectangle1,
+			rectangle2:			 slinderRectangle2,
+			drumShape:			 slinderDrumShape,
+			default:			 defaultPlane
 		},
 		"cone": {
-			circle:				coneCircle,
-			ellipse:			coneEllipse,
-			curveStraight:		coneCurveStraight,
-			isoscelesTriangle:	coneIsoscelesTriangle
+			circle:				 coneCircle,
+			ellipse:			 coneEllipse,
+			curveStraight:		 coneCurveStraight,
+			isoscelesTriangle:	 coneIsoscelesTriangle,
+			default:			 defaultPlane
 		},
 		"trun-cone": {
-			circle:				truncatedConeCircle,
-			ellipse:			truncatedConeEllipse,
-			curveStraight:		truncatedConeCurveStraight,
-			isoscelesTrapezoid:	truncatedConeIsoscelesTrapezoid
+			circle:				 truncatedConeCircle,
+			ellipse:			 truncatedConeEllipse,
+			curveStraight:		 truncatedConeCurveStraight,
+			isoscelesTrapezoid:	 truncatedConeIsoscelesTrapezoid,
+			default:			 defaultPlane
 		},
 		"tri-prism": {
-			triangle1:			triangularPrismTriangle1,
-			triangle2:			triangularPrismTriangle2,
-			rectangle1:			triangularPrismRectangle1,
-			rectangle2:			triangularPrismRectangle2,
-			trapezoid:			triangularPrismTrapezoid,
-			ordinaryPentagon:	triangularPrismOrdinaryPentagon
+			triangle1:			 triangularPrismTriangle1,
+			triangle2:			 triangularPrismTriangle2,
+			rectangle1:			 triangularPrismRectangle1,
+			rectangle2:			 triangularPrismRectangle2,
+			trapezoid:			 triangularPrismTrapezoid,
+			ordinaryPentagon:	 triangularPrismOrdinaryPentagon,
+			default:			 defaultPlane
 		}
 
     }
