@@ -221,8 +221,8 @@ function main() {
 			phiFrom = phiTo = Math.atan2(vFrom[0] / thetaFromSin, vFrom[2] / thetaFromSin);
 		*/
 		} else {
-			phiFrom = Math.atan2(vFrom[0] / thetaFromSin, vFrom[2] / thetaFromSin);
-			phiTo = Math.atan2(vTo[0] / thetaToSin, vTo[2] / thetaToSin);
+			phiFrom = Math.atan2(vFrom[0], vFrom[2]);
+			phiTo = Math.atan2(vTo[0], vTo[2]);
 		}
 		if (phiTo - phiFrom > Math.PI) {
 			phiFrom += Math.PI * 2;
@@ -395,6 +395,36 @@ function main() {
 		}
 	});
 
+	let mouseDragging = false;
+	let lastCameraNormal = [0, 0, 0];
+	let mouseDownPosition = [0, 0];
+	const mouseFactor = 0.01;
+	const thetaThreshold = 89.9;
+	canvas.addEventListener("mousedown", (event) => {
+		mouseDragging = true;
+		mouseDownPosition = [event.offsetX, event.offsetY];
+		Object.assign(lastCameraNormal, cameraNormal);
+	});
+
+	canvas.addEventListener("mousemove", (event) => {
+		if (mouseDragging) {
+			let deltaX = event.offsetX - mouseDownPosition[0], deltaY = event.offsetY - mouseDownPosition[1];
+			let theta = Math.acos(cameraNormal[1]);
+			let phi = Math.atan2(cameraNormal[0], cameraNormal[2]);
+			let newTheta = theta - deltaY * mouseFactor;
+			if (newTheta > thetaThreshold)
+				newTheta = thetaThreshold;
+			else if (newTheta < -thetaThreshold)
+				newTheta = -thetaThreshold;
+			cameraNormal = angleToVector(newTheta, phi - deltaX * mouseFactor);
+			mouseDownPosition = [event.offsetX, event.offsetY];
+		}
+	});
+	// 可能在canvas外面松开鼠标，所以事件绑定到document上
+	document.addEventListener("mouseup", () => {
+		mouseDragging = false;
+	})
+	
 	let objectUniforms = {
 		u_modelViewProjectionMatrix: null,
 		u_colorMult: [0.08, 0.8, 0.45, 0.8],
