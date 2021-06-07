@@ -360,7 +360,7 @@ function main() {
 	let lastCameraNormal = [0, 0, 0];
 	let mouseDownPosition = [0, 0];
 	const mouseFactor = 0.01;
-	const thetaThreshold = 89.9;
+	const thetaThreshold = 0.01;
 	canvas.addEventListener("mousedown", (event) => {
 		mouseDragging = true;
 		mouseDownPosition = [event.offsetX, event.offsetY];
@@ -373,10 +373,10 @@ function main() {
 			let theta = Math.acos(cameraNormal[1]);
 			let phi = Math.atan2(cameraNormal[0], cameraNormal[2]);
 			let newTheta = theta - deltaY * mouseFactor;
-			if (newTheta > thetaThreshold)
+			if (newTheta > Math.PI - thetaThreshold)
+				newTheta = Math.PI - thetaThreshold;
+			else if (newTheta < thetaThreshold)
 				newTheta = thetaThreshold;
-			else if (newTheta < -thetaThreshold)
-				newTheta = -thetaThreshold;
 			cameraNormal = angleToVector(newTheta, phi - deltaX * mouseFactor);
 			mouseDownPosition = [event.offsetX, event.offsetY];
 		}
