@@ -97,7 +97,7 @@
 			yTranslation:	 offset,
 			zTranslation:	 offset,
 			xRotation:		radToDeg( 0 ),
-			zRotation:		radToDeg( Math.PI / 2)
+			zRotation:		radToDeg(-Math.PI / 2)
 		};
 	}
 
@@ -251,7 +251,7 @@
 			yTranslation:	 offset,
 			zTranslation:	 offset,
 			xRotation:		radToDeg( 0 ),
-			zRotation:		radToDeg( Math.PI / 2)
+			zRotation:		radToDeg(-Math.PI / 2)
 		};
 	}
 
@@ -537,7 +537,7 @@
 			yTranslation:	 offset,
 			zTranslation:	 offset,
 			xRotation:		radToDeg( 0 ),
-			zRotation:		radToDeg( Math.PI / 2)
+			zRotation:		radToDeg(-Math.PI / 2)
 		};
 	}
 
