@@ -1,6 +1,6 @@
 "use strict";
 
-function main() {
+async function main() {
 	const canvas = document.querySelector('#glcanvas');
 	const gl = canvas.getContext('webgl', {stencil: true});
 	if (!gl) {
@@ -130,16 +130,19 @@ function main() {
 	const planeProgram		= webglUtils.createProgramInfo(gl, [planeVS,	planeFS]);
 	const clippingProgram	= webglUtils.createProgramInfo(gl, [clippingVS,	clippingFS]);
 	
+	const glTFBuffer = await glTF.loadGLTFBuffer(gl, './cube.gltf');
 	const objectBufferInfo	= new Map ([
-		['cube',		primitives.createCubeWithVertexColorsBufferInfo(gl, 10)],
+		['cube',		glTFBuffer[0]],
+		['cube1',		primitives.createCubeWithVertexColorsBufferInfo(gl, 10)],
 		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 16, 10, 16, 10, 10)],
 		['slinder',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 5, 5, 10)],
 		['cone',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 0, 5, 10)],
 		['trun-cone',	primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 3, 7.5, 10)],
 		['tri-prism',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 10, 10, 10)],
 	]);
+	console.log("cube", objectBufferInfo.get('cube'));
+	console.log("my", objectBufferInfo.get('cube1'));
 	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());
-
 
 	// 与摄像机有关的常量
 	const cameraDistance		= 50;
@@ -157,13 +160,16 @@ function main() {
 
 	let currentObjectKey = 'cube'; 
 	document.getElementById("objectList").addEventListener("change", () => {
+		// 设置当前物体并更换缓冲
 		document.getElementsByName("objectType").forEach((curr) => {
 			if (curr.checked) {
 				currentObjectKey = curr.id;
 				changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey));
 			}
 		});
+		// 重设平面
 		animateTransform('plane', 500, preplanes[currentObjectKey]['default'](objectLength), interpolateSquare);
+		// 更改预设平面选择器
 		document.getElementsByName("planeSelector").forEach((curr) => {
 			curr.firstElementChild.selected = 'true';
 			curr.style.display = 'none';
@@ -329,8 +335,8 @@ function main() {
 			if (Math.abs(cameraNormalDst[1]) === 1) {
 				// dirty trick
 				// 当摄像机位置在y轴上时 则与upNormal重合 无法通过向量外积计算x轴
-				// 因此将摄像机z轴位置微调一点点为0.001 使得摄像机位置偏离y轴即可
-				cameraNormalDst[2] = 1e-3;
+				// 因此将摄像机z轴位置微调一点点为0.0001 使得摄像机位置偏离y轴即可
+				cameraNormalDst[2] = 1e-4;
 				cameraNormalDst = m4.normalize(cameraNormalDst);
 			}
 			let normalAnimation = computeNormalAnimation(cameraNormal, cameraNormalDst);
@@ -360,7 +366,7 @@ function main() {
 	let lastCameraNormal = [0, 0, 0];
 	let mouseDownPosition = [0, 0];
 	const mouseFactor = 0.01;
-	const thetaThreshold = 0.01;
+	const thetaThreshold = 1e-4;
 	canvas.addEventListener("mousedown", (event) => {
 		mouseDragging = true;
 		mouseDownPosition = [event.offsetX, event.offsetY];
