@@ -11,83 +11,72 @@ async function main() {
 	// Object vertex shader program
 	const objectVS = `
 		attribute vec4 a_position;
-		attribute vec4 a_color;
 		attribute vec3 a_normal;
 		
 		uniform mat4 u_modelViewProjectionMatrix;
 		uniform mat3 u_normalMatrix;
 		
 		varying highp vec3 v_normal;
-		varying lowp vec4 v_color;
 		
 		void main() {
 			gl_Position = u_modelViewProjectionMatrix * a_position;
 			v_normal = u_normalMatrix * a_normal;
-			v_color = a_color;
 		}
 	`;
 	// Object fragment shader program
 	const objectFS = `
 		precision highp float;
 		
-		uniform vec4 u_colorMult;
+		uniform vec4 u_color;
 		uniform vec3 u_lightPosition;
 
 		varying highp vec3 v_normal;
-		varying lowp vec4 v_color;
 		
 		void main() {
 			vec3 normal = normalize(v_normal);
 			float light = abs(dot(normal, u_lightPosition));
-			gl_FragColor = v_color * u_colorMult;
+			gl_FragColor = u_color;
 			gl_FragColor.rgb = gl_FragColor.rgb * light * gl_FragColor.a;
-			gl_FragColor.a = u_colorMult.a;
+			gl_FragColor.a = u_color.a;
 		}
 	`;
 	// Plane vertex shader program
 	const planeVS = `
 		attribute vec4 a_position;
-		attribute vec4 a_color;
 		attribute vec3 a_normal;
 		
 		uniform mat4 u_modelViewProjectionMatrix;
 		
 		varying highp vec3 v_normal;
-		varying lowp vec4 v_color;
 		
 		void main() {
 			gl_Position = u_modelViewProjectionMatrix * a_position;
-			v_color = a_color;
 		}
 	`;
 	// Planefragment shader program
 	const planeFS = `
 		precision highp float;
 		
-		uniform vec4 u_colorMult;
+		uniform vec4 u_color;
 
-		varying lowp vec4 v_color;
 		
 		void main() {
-			gl_FragColor = v_color * u_colorMult;
-			gl_FragColor.a = u_colorMult.a;
+			gl_FragColor = u_color;
+			gl_FragColor.a = u_color.a;
 		}
 	`;
 	// Clipping vertex shader program
 	const clippingVS = `
 		attribute vec4 a_position;
-		attribute vec4 a_color;
 		
 		uniform mat4 u_modelViewMatrix;
 		uniform mat4 u_modelViewProjectionMatrix;
 		
-		varying lowp vec4 v_color;
 		varying vec3 v_modelViewPosition;
 		
 		void main() {
 			v_modelViewPosition = (u_modelViewMatrix * a_position).xyz;
 			gl_Position = u_modelViewProjectionMatrix * a_position;
-			v_color = a_color;
 		}
 	`;
 	// Clipping fragment shader program
@@ -97,9 +86,8 @@ async function main() {
 		uniform mat4 u_viewMatrix;
 		uniform mat3 u_viewNormalMatrix;
 		uniform vec4 u_clippingPlane;
-		uniform vec4 u_colorMult;
+		uniform vec4 u_color;
 
-		varying lowp vec4 v_color;
 		varying vec3 v_modelViewPosition;
 
 		vec4 planeToEC(vec4 plane, mat4 viewMatrix, mat3 viewNormalMatrix) {
@@ -122,7 +110,7 @@ async function main() {
 			if (distance * planeSide < 1e-4) {
 				discard;
 			}
-			gl_FragColor = v_color * u_colorMult;
+			gl_FragColor = u_color;
 		}
 	`;
 
@@ -141,7 +129,7 @@ async function main() {
 		['tri-prism',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 10, 10, 10)],
 	]);
 	console.log("cube", objectBufferInfo.get('cube'));
-	console.log("my", objectBufferInfo.get('cube1'));
+	console.log("cube1", objectBufferInfo.get('cube1'));
 	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());
 
 	// 与摄像机有关的常量
@@ -394,7 +382,7 @@ async function main() {
 	
 	let objectUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_colorMult: [0.08, 0.8, 0.45, 0.8],
+		u_color: [0.08, 0.8, 0.45, 0.8],
 		u_normalMatrix: null,
 		u_lightPosition: null
 	};
@@ -408,15 +396,16 @@ async function main() {
 	};
 	let planeUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_colorMult: [0.4, 0.88, 0.88, 0.6]
+		u_color: [0.4, 0.88, 0.88, 0.6]
 	};
 	let planeInnerUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_colorMult: [0.84, 0.5, 0.12, 0.8]
+		u_color: [0.84, 0.5, 0.12, 0.8]
 	};
 
 	let objectsMapToDraw = new Map ();
 	initObjectsMap(objectsMapToDraw, currentObjectKey);
+	console.log('obj2draw', objectsMapToDraw.get('fillDepthBuffer'))
 
 	function degToRad(d) {
 		return d * Math.PI / 180;
@@ -738,67 +727,74 @@ async function main() {
 			// 设置uniform变量
 			webglUtils.setUniforms(programInfo, object.uniforms);
 			
-			if (renderOption.disableDepth) {
-				gl.disable(gl.DEPTH_TEST);
-			} else {
-				gl.enable(gl.DEPTH_TEST);
+			{
+				if (renderOption.disableDepth) {
+					gl.disable(gl.DEPTH_TEST);
+				} else {
+					gl.enable(gl.DEPTH_TEST);
+				}
+				if (renderOption.clearDepth) {
+					gl.depthMask(true);
+					gl.clear(gl.DEPTH_BUFFER_BIT);
+				}
+				if (renderOption.disableDepthWrite) {
+					gl.depthMask(false);
+				} else {
+					gl.depthMask(true);
+				}
+				if (renderOption.depthFunc) {
+					gl.depthFunc(renderOption.depthFunc);
+				} else {
+					gl.depthMask(gl.LESS);
+				}
+				if (renderOption.disableColor) {
+					gl.colorMask(false, false, false, false);
+				} else {
+					gl.colorMask(true, true, true, true);
+				}
+				if (renderOption.cullFace) {
+					gl.enable(gl.CULL_FACE);
+					gl.cullFace(renderOption.cullFace);
+				} else {
+					gl.disable(gl.CULL_FACE);
+				}
+				// Stencil 相关
+				if (renderOption.useStencil) {
+					gl.enable(gl.STENCIL_TEST);
+				} else {
+					gl.disable(gl.STENCIL_TEST);
+				}
+				if (renderOption.stencilClear) {
+					gl.stencilMask(0xFF);
+					gl.clear(gl.STENCIL_BUFFER_BIT);
+				}
+				if (renderOption.stencilWrite) {
+					gl.stencilMask(0xFF);
+				} else {
+					gl.stencilMask(0);
+				}
+				if (renderOption.stencilOp) {
+					gl.stencilOp(renderOption.stencilOp[0], renderOption.stencilOp[1], renderOption.stencilOp[2]);
+				}
+				if (renderOption.stencilFrontOp) {
+					gl.stencilOpSeparate(gl.FRONT, renderOption.stencilFrontOp[0], renderOption.stencilFrontOp[1], renderOption.stencilFrontOp[2]);
+				}
+				if (renderOption.stencilBackOp) {
+					gl.stencilOpSeparate(gl.BACK, renderOption.stencilBackOp[0], renderOption.stencilBackOp[1], renderOption.stencilBackOp[2]);
+				}
+				if (renderOption.stencilFunc) {
+					gl.stencilFunc(renderOption.stencilFunc[0], renderOption.stencilFunc[1], renderOption.stencilFunc[2])
+				}
 			}
-			if (renderOption.clearDepth) {
-				gl.depthMask(true);
-				gl.clear(gl.DEPTH_BUFFER_BIT);
-			}
-			if (renderOption.disableDepthWrite) {
-				gl.depthMask(false);
-			} else {
-				gl.depthMask(true);
-			}
-			if (renderOption.depthFunc) {
-				gl.depthFunc(renderOption.depthFunc);
-			} else {
-				gl.depthMask(gl.LESS);
-			}
-			if (renderOption.disableColor) {
-				gl.colorMask(false, false, false, false);
-			} else {
-				gl.colorMask(true, true, true, true);
-			}
-			if (renderOption.cullFace) {
-				gl.enable(gl.CULL_FACE);
-				gl.cullFace(renderOption.cullFace);
-			} else {
-				gl.disable(gl.CULL_FACE);
-			}
-			// Stencil 相关
-			if (renderOption.useStencil) {
-				gl.enable(gl.STENCIL_TEST);
-			} else {
-				gl.disable(gl.STENCIL_TEST);
-			}
-			if (renderOption.stencilClear) {
-				gl.stencilMask(0xFF);
-				gl.clear(gl.STENCIL_BUFFER_BIT);
-			}
-			if (renderOption.stencilWrite) {
-				gl.stencilMask(0xFF);
-			} else {
-				gl.stencilMask(0);
-			}
-			if (renderOption.stencilOp) {
-				gl.stencilOp(renderOption.stencilOp[0], renderOption.stencilOp[1], renderOption.stencilOp[2]);
-			}
-			if (renderOption.stencilFrontOp) {
-				gl.stencilOpSeparate(gl.FRONT, renderOption.stencilFrontOp[0], renderOption.stencilFrontOp[1], renderOption.stencilFrontOp[2]);
-			}
-			if (renderOption.stencilBackOp) {
-				gl.stencilOpSeparate(gl.BACK, renderOption.stencilBackOp[0], renderOption.stencilBackOp[1], renderOption.stencilBackOp[2]);
-			}
-			if (renderOption.stencilFunc) {
-				gl.stencilFunc(renderOption.stencilFunc[0], renderOption.stencilFunc[1], renderOption.stencilFunc[2])
-			}
-			
 			
 			// 绘制3D图形
-			gl.drawArrays(gl.TRIANGLES, 0, bufferInfo.numElements);
+			if (bufferInfo.indices) {
+				gl.drawElements(gl.TRIANGLES, bufferInfo.numElements, gl.UNSIGNED_SHORT, bufferInfo)
+			} else {
+				gl.drawArrays(gl.TRIANGLES, 0, bufferInfo.numElements);
+			}
+			// webglUtils.drawBufferInfo(gl, bufferInfo)
+
 		});
 
 		requestAnimationFrame(drawScene);

@@ -12,7 +12,6 @@
 		root.glTF = factory(root);
 	}
 } (this, function() {
-
 	class Node {
 		constructor(source, name) {
 			this.name		= name;
@@ -68,7 +67,7 @@
 		['VEC4',	4],
 		['MAT2',	4],
 		['MAT3',	9],
-		['MAT4',	1],
+		['MAT4',	16]
 	]);;
 	function accessorTypeToNumComponents (type) {
 		if (accessorMap.has(type)) {
@@ -78,13 +77,13 @@
 	}
 
 	const glMap = new Map ([
-		['5120',	Int8Array	],	// gl.BYTE
-		['5121',	Uint8Array	],	// gl.UNSIGNED_BYTE
-		['5122',	Int16Array	],	// gl.SHORT
-		['5123',	Uint16Array	],	// gl.UNSIGNED_SHORT
-		['5124',	Int32Array	],	// gl.INT
-		['5125',	Uint32Array	],	// gl.UNSIGNED_INT
-		['5126',	Float32Array],	// gl.FLOAT
+		[5120,	Int8Array	],	// gl.BYTE
+		[5121,	Uint8Array	],	// gl.UNSIGNED_BYTE
+		[5122,	Int16Array	],	// gl.SHORT
+		[5123,	Uint16Array	],	// gl.UNSIGNED_SHORT
+		[5124,	Int32Array	],	// gl.INT
+		[5125,	Uint32Array	],	// gl.UNSIGNED_INT
+		[5126,	Float32Array]	// gl.FLOAT
 	]);
 	function glTypeToTypedArray (type) {
 		if (glMap.has(type)) {
@@ -100,7 +99,9 @@
 			const buffer = gl.createBuffer();
 			const target = bufferView.target || gl.ARRAY_BUFFER;
 			const arrayBuffer = gltf.buffers[bufferView.buffer];
-			const data = new Uint8Array(arrayBuffer, bufferView.byteOffset, bufferView.byteLength);
+			const arrayType = glTypeToTypedArray(accessor.componentType);
+			const bufferLength = bufferView.byteLength / arrayType.BYTES_PER_ELEMENT;
+			const data = new arrayType (arrayBuffer, bufferView.byteOffset, bufferLength);
 			gl.bindBuffer(target, buffer);
 			gl.bufferData(target, data, gl.STATIC_DRAW);
 			bufferView.webglBuffer = buffer;
@@ -120,12 +121,6 @@
 			return loadBinary(url.href);
 		}));
 
-		const colorArray = webglUtils.makeTypedArray ({
-			numComponents:	4,
-			data:			[255, 255, 255, 255, 255, 0, 0, 255, 0, 0, 255, 255],
-			type: 			Uint8Array
-		}, 'color');
-
 		const gltfBufferArray = [];
 		
 		gltf.meshes.forEach((mesh) => {
@@ -140,12 +135,7 @@
 							buffer:			buffer,
 							numComponents:	accessorTypeToNumComponents(accessor.type),
 							type:			accessor.componentType,
-							// offset:			accessor.byteOffset | 0
-						};
-						attribs['a_color'] = {
-							buffer: 		webglUtils.createBufferFromTypedArray(gl, colorArray),
-							numComponents:	colorArray.numComponents,
-							type:			5121
+							offset:			accessor.byteOffset | 0
 						};
 					}
 				}
@@ -155,20 +145,15 @@
 				if (primitive.indices !== undefined) {
 					const {accessor, buffer} = getAccessorAndWebGLBuffer(gl, gltf, primitive.indices);
 					bufferInfo.numElements = accessor.count;
-					// bufferInfo.indices = buffer;
-					// bufferInfo.elementType = accessor.componentType;
+					bufferInfo.indices = buffer;
+					bufferInfo.elementType = accessor.componentType;
 				}
+				primitive.bufferInfo = bufferInfo;
 				gltfBufferArray.push(bufferInfo);
-			})	
+			})
 		});
+		console.log(gltfBufferArray)
 		return gltfBufferArray
-	}
-
-	function addChildren(nodes, node, childIndices) {
-		childIndices.forEach((childNdx) => {
-			const child = nodes[childNdx];
-			child.setParent(node);
-		});
 	}
 
 	async function loadFile(url, typeFunc) {
