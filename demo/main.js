@@ -38,9 +38,11 @@ function main() {
 		
 		void main() {
 			vec3 normal = normalize(v_normal);
-			float light = abs(dot(normal, u_lightPosition));
+			vec3 lightNormal = normalize(u_lightPosition);
+			float light = dot(normal, lightNormal);
 			gl_FragColor = v_color * u_colorMult;
-			gl_FragColor.rgb = gl_FragColor.rgb * light * gl_FragColor.a;
+			// gl_FragColor.rgb = gl_FragColor.rgb * light * gl_FragColor.a;
+			gl_FragColor.rgb = gl_FragColor.rgb + (vec3(1.0, 1.0, 1.0) - gl_FragColor.rgb) * light; 
 			gl_FragColor.a = u_colorMult.a;
 		}
 	`;
@@ -119,10 +121,14 @@ function main() {
 			vec4 planeInEC = planeToEC(u_clippingPlane, u_viewMatrix, u_viewNormalMatrix);
 			float distance = calDistance(planeInEC, v_modelViewPosition);
 			float planeSide = dot(v_modelViewPosition, planeInEC.xyz);
-			if (distance * planeSide < 1e-4) {
+			float mul = distance * planeSide;
+			if (abs(mul) < 1.0) {
+				//gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+				//return;
+			} else if (mul < 1e-4) {
 				discard;
 			}
-			gl_FragColor = v_color * u_colorMult;
+			gl_FragColor = vec4(1.0, 1.0, 1.0, 0.0);
 		}
 	`;
 
@@ -138,22 +144,29 @@ function main() {
 		['trun-cone',	primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 3, 7.5, 10)],
 		['tri-prism',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 10, 10, 10)],
 	]);
+	const cubeLineBufferInfo = primitives.createCubeLineWithVertexColorsBufferInfo(gl, 10);
 	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());
 
 
 	// 与摄像机有关的常量
 	const cameraDistance		= 50;
+	const cameraScale			= 2000;
 	const targetPosition		= [0, 0, 0];
 	const defaultCameraNormal	= m4.normalize([20, 20, 50]);
 	const upNormal				= [0, 1, 0];
-	const horizontalOffset		= gl.canvas.clientWidth / 40;
-	const verticalOffset		= gl.canvas.clientHeight / 40;
-	const nearOffset			= 1;
-	const farOffset				= 2000;
-	// 与光源和物体有关的常量
-	const lightPosition			= m4.normalize([1, 2, 3]);
-	const objectLength			= 10;
-	const objectTranslation		= [  0,  0,  0];
+
+	const cameraAngleRadian	= degToRad(0);
+	const fieldOfViewRadian	= degToRad(60);
+	const cameraHeight		= 50;
+	const aspect			= gl.canvas.clientWidth / gl.canvas.clientHeight;
+	const horizontalOffset	= gl.canvas.clientWidth * cameraDistance /  cameraScale;
+	const verticalOffset	= gl.canvas.clientHeight * cameraDistance / cameraScale;
+	const nearOffset		= 1;
+	const farOffset			= 2000;
+
+	const lightPosition		= m4.normalize([-2, 1, 3]);
+	const objectLength		= 10;
+	const objectTranslation	= [  0,  0,  0];
 
 	let currentObjectKey = 'cube'; 
 	document.getElementById("objectList").addEventListener("change", () => {
@@ -360,7 +373,7 @@ function main() {
 	let lastCameraNormal = [0, 0, 0];
 	let mouseDownPosition = [0, 0];
 	const mouseFactor = 0.01;
-	const thetaThreshold = 0.01;
+	const thetaThreshold = 0.001;
 	canvas.addEventListener("mousedown", (event) => {
 		mouseDragging = true;
 		mouseDownPosition = [event.offsetX, event.offsetY];
@@ -388,7 +401,7 @@ function main() {
 	
 	let objectUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_colorMult: [0.08, 0.8, 0.45, 0.8],
+		u_colorMult: [0xD0/0xFF, 0xD8/0xFF, 0xEE/0xFF, 0.7],
 		u_normalMatrix: null,
 		u_lightPosition: null
 	};
@@ -402,11 +415,14 @@ function main() {
 	};
 	let planeUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_colorMult: [0.4, 0.88, 0.88, 0.6]
+		u_colorMult: [1.0, 0x3C/0xFF, 0x3C/0xFF, 0.13]
+	};
+	let lineUniforms = {
+		u_colorMult: [0.0, 0.0, 0.0, 1.0]
 	};
 	let planeInnerUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_colorMult: [0.84, 0.5, 0.12, 0.8]
+		u_colorMult: [1.0, 0x3C/0xFF, 0x3C/0xFF, 0.5]
 	};
 
 	let objectsMapToDraw = new Map ();
@@ -419,12 +435,29 @@ function main() {
 	function initObjectsMap(objectsMap, objectKey) {
 		objectsMap.clear();
 		objectsMap.set(
+			'fillModelBuffer', {
+				// 填充切面背后的几何体到模版缓冲
+				programInfo: clippingProgram,
+				bufferInfo: objectBufferInfo.get(objectKey),
+				uniforms: objectClippedUniforms,
+				renderOption: {
+					clearDepth: true,
+					useStencil: true,
+					stencilWrite: true,
+					//disableColor: true,
+					stencilBackOp: [gl.KEEP, gl.KEEP, gl.INCR],
+					stencilFrontOp: [gl.KEEP, gl.KEEP, gl.DECR],
+					stencilFunc: [gl.ALWAYS, 1, 0xFF],
+				}
+			}
+		).set(
 			'fillDepthBuffer', {
 				// 填充几何体背面到深度缓冲
 				programInfo: objectProgram,
 				bufferInfo: objectBufferInfo.get(objectKey),
 				uniforms: objectUniforms,
 				renderOption: {
+					clearDepth: true,
 					disableColor: true,
 					cullFace: gl.FRONT,
 				}
@@ -454,20 +487,16 @@ function main() {
 				}
 			}
 		).set(
-			'fillModelBuffer', {
-				// 填充切面背后的几何体到模版缓冲
-				programInfo: clippingProgram,
-				bufferInfo: objectBufferInfo.get(objectKey),
-				uniforms: objectClippedUniforms,
+			'drawLine', {
+				// 画在几何体后的平面
+				programInfo: planeProgram,
+				bufferInfo: cubeLineBufferInfo,
+				uniforms: lineUniforms,
 				renderOption: {
-					clearDepth: true,
-					useStencil: true,
-					stencilWrite: true,
-					disableColor: true,
-					stencilBackOp: [gl.KEEP, gl.KEEP, gl.INCR],
-					stencilFrontOp: [gl.KEEP, gl.KEEP, gl.DECR],
-					stencilFunc: [gl.ALWAYS, 1, 0xFF],
-				}
+					disableDepthWrite: false,
+					depthFunc: gl.ALWAYS,
+				},
+				type: gl.LINES,
 			}
 		).set(
 			'drawFrontObject', {
@@ -476,8 +505,9 @@ function main() {
 				bufferInfo: objectBufferInfo.get(objectKey),
 				uniforms: objectUniforms,
 				renderOption: {
-					clearDepth: true,
+					clearDepth: false,
 					cullFace: gl.BACK,
+					depthFunc: gl.LESS,
 				}
 			}
 		).set(
@@ -696,6 +726,7 @@ function main() {
 			computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation);
 		objectUniforms.u_normalMatrix	= m4.normalFromMat4(computeModelMatrix(objectTranslation, objectRotation));
 		objectUniforms.u_lightPosition	= lightPosition;
+		lineUniforms.u_modelViewProjectionMatrix = objectUniforms.u_modelViewProjectionMatrix;
 
 		planeUniforms.u_modelViewProjectionMatrix = planeInnerUniforms.u_modelViewProjectionMatrix =
 			m4.multiply(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), planeTransformMatrix);
@@ -749,7 +780,7 @@ function main() {
 			if (renderOption.depthFunc) {
 				gl.depthFunc(renderOption.depthFunc);
 			} else {
-				gl.depthMask(gl.LESS);
+				gl.depthFunc(gl.LESS);
 			}
 			if (renderOption.disableColor) {
 				gl.colorMask(false, false, false, false);
@@ -792,7 +823,7 @@ function main() {
 			
 			
 			// 绘制3D图形
-			gl.drawArrays(gl.TRIANGLES, 0, bufferInfo.numElements);
+			gl.drawArrays(object.type ? object.type : gl.TRIANGLES, 0, bufferInfo.numElements);
 		});
 
 		requestAnimationFrame(drawScene);

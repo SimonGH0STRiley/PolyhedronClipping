@@ -465,6 +465,67 @@
 		};
 	}
 
+	function createCubeLineVertices(length) {
+		const k = length / 2;
+
+		const cornerVertices = [
+			[-k, -k, -k],
+			[+k, -k, -k],
+			[-k, +k, -k],
+			[+k, +k, -k],
+			[-k, -k, +k],
+			[+k, -k, +k],
+			[-k, +k, +k],
+			[+k, +k, +k],
+		];
+
+		const faceNormals = [
+			[+1, +0, +0],
+			[-1, +0, +0],
+			[+0, +1, +0],
+			[+0, -1, +0],
+			[+0, +0, +1],
+			[+0, +0, -1],
+		];
+
+		const uvCoords = [
+			[1, 0],
+			[0, 0],
+			[0, 1],
+			[1, 1],
+		];
+
+		const numVertices = 8 * 3;
+		const positions = webglUtils.createAugmentedTypedArray(3, numVertices);
+		const normals   = webglUtils.createAugmentedTypedArray(3, numVertices);
+		const texCoords = webglUtils.createAugmentedTypedArray(2 , numVertices);
+		const indices   = webglUtils.createAugmentedTypedArray(2, 6 * 2, Uint16Array);
+
+		for (let f = 0; f < 6; ++f) {
+			const faceIndices = CUBE_FACE_INDICES[f];
+			for (let v = 0; v < 4; ++v) {
+				const position = cornerVertices[faceIndices[v]];
+				const normal = faceNormals[f];
+				const uv = uvCoords[v];
+
+				// Each face needs all four vertices because the normals and texture
+				// coordinates are not all the same.
+				positions.push(position);
+				normals.push(normal);
+				texCoords.push(uv);
+
+			}
+		}
+		indices.push([0, 1, 1, 2, 3, 2, 3, 0], [4, 5, 5, 6, 6, 7, 7, 4], [0, 5, 1, 4, 2, 7, 3, 6]);
+		
+		return {
+			position: positions,
+			normal: normals,
+			texcoord: texCoords,
+			indices: indices,
+		};
+	}
+
 	/**
 	 * Array of the indices of corners of each face of a truncated
 	 * pyramid. The order of indices are in counter clockwise, such
@@ -883,6 +944,11 @@
 		createCubeBufferInfo: createBufferInfoFunc(createCubeVertices),
 		createCubeBuffers: createBufferFunc(createCubeVertices),
 		createCubeWithVertexColorsBufferInfo: createFlattenedFunc(createCubeVertices),
+
+		createCubeLineVertices,
+		createCubeLineBufferInfo: createBufferInfoFunc(createCubeLineVertices),
+		createCubeLineBuffers: createBufferFunc(createCubeLineVertices),
+		createCubeLineWithVertexColorsBufferInfo: createFlattenedFunc(createCubeLineVertices),
 		
 		createSphereVertices,
 		createSphereBufferInfo: createBufferInfoFunc(createSphereVertices),
