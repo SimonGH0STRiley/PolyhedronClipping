@@ -384,7 +384,7 @@ async function main() {
 	
 	let objectUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_color: [0xD0/0xFF, 0xD8/0xFF, 0xEE/0xFF, 0.6],
+		u_color: [0xD0/0xFF, 0xD8/0xFF, 0xEE/0xFF, 0.7],
 		u_normalMatrix: null,
 		u_lightPosition: null
 	};
@@ -428,11 +428,12 @@ async function main() {
 				uniforms: objectClippedUniforms,
 				renderOption: {
 					clearDepth: true,
+					disableDepth: true,
 					useStencil: true,
 					stencilWrite: true,
 					disableColor: true,
-					stencilBackOp: [gl.KEEP, gl.KEEP, gl.INCR],
-					stencilFrontOp: [gl.KEEP, gl.KEEP, gl.DECR],
+					stencilBackOp: [gl.KEEP, gl.KEEP, gl.DECR_WRAP],
+					stencilFrontOp: [gl.KEEP, gl.KEEP, gl.INCR_WRAP],
 					stencilFunc: [gl.ALWAYS, 1, 0xFF],
 				}
 			}
@@ -444,6 +445,7 @@ async function main() {
 				uniforms: objectUniforms,
 				renderOption: {
 					clearDepth: true,
+					disableDepth: false,
 					disableColor: true,
 					cullFace: gl.FRONT,
 				}
@@ -478,10 +480,10 @@ async function main() {
 				bufferInfo: planeBufferInfo,
 				uniforms: planeInnerUniforms,
 				renderOption: {
-					disableDepth: false,
+					disableDepth: true,
 					useStencil: true,
 					stencilOp: [gl.KEEP, gl.KEEP, gl.KEEP],
-					stencilFunc: [gl.EQUAL, 1, 0xFF],
+					stencilFunc: [gl.EQUAL, 0x80, 0x80],
 				}
 			}
 		).set(
@@ -490,6 +492,10 @@ async function main() {
 				programInfo: objProgramWithoutLight,
 				bufferInfo: objectBufferInfo.get(objectKey + 'Edge'),
 				uniforms: objectEdgeUniforms,
+				renderOption: {
+					// clearDepth: true,
+					depthFunc: gl.ALWAYS,
+				}
 			}
 		).set(
 			'drawFrontObject', {
