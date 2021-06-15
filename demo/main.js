@@ -144,6 +144,7 @@ async function main() {
 	// 与光源和物体有关的常量
 	const lightPosition			= m4.normalize([1, 2, 3]);
 	const objectLength			= 10;
+	const objectScale			= 10 / 200;
 	const objectTranslation		= [  0,  0,  0];
 
 	let currentObjectKey = 'cube'; 
@@ -203,10 +204,10 @@ async function main() {
 	}
 
 	function computeNormalAnimation(vFrom, vTo) {
-		const thetaFrom = Math.acos(vFrom[1]);
-		const thetaTo = Math.acos(vTo[1]);
+		const srcTheta = Math.acos(vFrom[1]);
+		const dstTheta = Math.acos(vTo[1]);
 		let phiFrom, phiTo;
-		let thetaFromSin = Math.sin(thetaFrom), thetaToSin = Math.sin(thetaTo);
+		let thetaFromSin = Math.sin(srcTheta), thetaToSin = Math.sin(dstTheta);
 		if (thetaFromSin === 0 && thetaToSin === 0) {
 			// Any direction should work
 			phiFrom = phiTo = 0;
@@ -229,11 +230,11 @@ async function main() {
 		}
 		return {
 			from: {
-				rotateTheta: thetaFrom,
+				rotateTheta: srcTheta,
 				rotatePhi: phiFrom,
 			},
 			to: {
-				rotateTheta: thetaTo,
+				rotateTheta: dstTheta,
 				rotatePhi: phiTo,
 			}
 		};
@@ -688,7 +689,7 @@ async function main() {
 
 		// 对每个物体计算矩阵，并且传入uniform
 		objectUniforms.u_modelViewProjectionMatrix = 
-			computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation);
+			m4.scale(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), objectScale, objectScale, objectScale);
 		objectUniforms.u_normalMatrix	= m4.normalFromMat4(computeModelMatrix(objectTranslation, objectRotation));
 		objectUniforms.u_lightPosition	= lightPosition;
 
@@ -698,7 +699,7 @@ async function main() {
 		objectClippedUniforms.u_modelMatrix					= computeModelMatrix(objectTranslation, objectRotation);
 		objectClippedUniforms.u_viewMatrix					= viewMatrix;
 		objectClippedUniforms.u_modelViewMatrix				= m4.multiply(viewMatrix, objectClippedUniforms.u_modelMatrix);
-		objectClippedUniforms.u_modelViewProjectionMatrix	= m4.multiply(projectionMatrix, objectClippedUniforms.u_modelViewMatrix);
+		objectClippedUniforms.u_modelViewProjectionMatrix	= m4.scale(m4.multiply(projectionMatrix, objectClippedUniforms.u_modelViewMatrix), objectScale, objectScale, objectScale);
 		objectClippedUniforms.u_viewNormalMatrix			= viewNormalMatrix;
 		objectClippedUniforms.u_clippingPlane				= computeClippingPlane(clippingPlane, objectTranslation, objectRotation);
 		

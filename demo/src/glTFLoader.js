@@ -131,7 +131,8 @@
 					if (attribName === 'POSITION' || attribName === 'NORMAL' || attribName === 'TEXCOORD_0') {
 						const {accessor, buffer} = getAccessorAndWebGLBuffer(gl, gltf, index);
 						numElements = accessor.count;
-						attribs[`a_${attribName.toLowerCase().split('_')[0]}`] = {
+						attribs[`a_${attribName.toLowerCase()}`] = {
+						// attribs[`a_${attribName}`] = {
 							buffer:			buffer,
 							numComponents:	accessorTypeToNumComponents(accessor.type),
 							type:			accessor.componentType,
@@ -143,6 +144,13 @@
 					attribs, numElements
 				}
 				if (primitive.indices !== undefined) {
+					const bufferView = gltf.bufferViews[primitive.indices];
+					if (bufferView.target !== undefined) {
+						if (bufferView.target !== 34963)
+							console.warn("BufferView " + primitive.indices + " should have a target equal to ELEMENT_ARRAY_BUFFER");
+					} else {
+						bufferView.target = 34963; // ELEMENT_ARRAY_BUFFER
+					}
 					const {accessor, buffer} = getAccessorAndWebGLBuffer(gl, gltf, primitive.indices);
 					bufferInfo.numElements = accessor.count;
 					bufferInfo.indices = buffer;
