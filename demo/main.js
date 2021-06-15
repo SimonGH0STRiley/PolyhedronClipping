@@ -34,9 +34,9 @@ async function main() {
 		
 		void main() {
 			vec3 normal = normalize(v_normal);
-			float light = abs(dot(normal, u_lightPosition));
+			float light = dot(normal, u_lightPosition);
 			gl_FragColor = u_color;
-			gl_FragColor.rgb = gl_FragColor.rgb * light * gl_FragColor.a;
+			gl_FragColor.rgb = gl_FragColor.rgb + (vec3(1.0, 1.0, 1.0) - gl_FragColor.rgb) * light;
 			gl_FragColor.a = u_color.a;
 		}
 	`;
@@ -143,7 +143,7 @@ async function main() {
 	const nearOffset			= 1;
 	const farOffset				= 2000;
 	// 与光源和物体有关的常量
-	const lightPosition			= m4.normalize([1, 2, 3]);
+	const lightPosition			= m4.normalize([-3, 1, 2]);
 	const objectLength			= 10;
 	const objectScale			= 10 / 200;
 	const objectTranslation		= [  0,  0,  0];
@@ -384,7 +384,7 @@ async function main() {
 	
 	let objectUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_color: [0.08, 0.8, 0.45, 0.8],
+		u_color: [0xD0/0xFF, 0xD8/0xFF, 0xEE/0xFF, 0.6],
 		u_normalMatrix: null,
 		u_lightPosition: null
 	};
@@ -402,11 +402,11 @@ async function main() {
 	};
 	let planeUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_color: [0.4, 0.88, 0.88, 0.6]
+		u_color: [1.0, 0x3C/0xFF, 0x3C/0xFF, 0.13]
 	};
 	let planeInnerUniforms = {
 		u_modelViewProjectionMatrix: null,
-		u_color: [0.84, 0.5, 0.12, 0.8]
+		u_color: [1.0, 0x3C/0xFF, 0x3C/0xFF, 1]
 	};
 
 	let objectsMapToDraw = new Map ();
@@ -443,6 +443,7 @@ async function main() {
 				bufferInfo: objectBufferInfo.get(objectKey),
 				uniforms: objectUniforms,
 				renderOption: {
+					clearDepth: true,
 					disableColor: true,
 					cullFace: gl.FRONT,
 				}
@@ -460,41 +461,47 @@ async function main() {
 				}
 			}
 		).set(
-		// 	'drawBackObject', {
-		// 		// 画几何体背面
-		// 		programInfo: objProgramWithLignt,
-		// 		bufferInfo: objectBufferInfo.get(objectKey),
-		// 		uniforms: objectUniforms,
-		// 		renderOption: {
-		// 			disableDepth: true,
-		// 			depthFunc: gl.LESS,
-		// 			cullFace: gl.FRONT,
-		// 		}
-		// 	}
-		// ).set(
+			'drawBackObject', {
+				// 画几何体背面
+				programInfo: objProgramWithLignt,
+				bufferInfo: objectBufferInfo.get(objectKey),
+				uniforms: objectUniforms,
+				renderOption: {
+					disableDepth: true,
+					cullFace: gl.FRONT,
+				}
+			}
+		).set(
+			'drawClippingPlane', {
+				// 画切面
+				programInfo: objProgramWithoutLight,
+				bufferInfo: planeBufferInfo,
+				uniforms: planeInnerUniforms,
+				renderOption: {
+					disableDepth: false,
+					useStencil: true,
+					stencilOp: [gl.KEEP, gl.KEEP, gl.KEEP],
+					stencilFunc: [gl.EQUAL, 1, 0xFF],
+				}
+			}
+		).set(
 			'drawObjectEdge', {
 				// 画边框
 				programInfo: objProgramWithoutLight,
 				bufferInfo: objectBufferInfo.get(objectKey + 'Edge'),
 				uniforms: objectEdgeUniforms,
+			}
+		).set(
+			'drawFrontObject', {
+				// 画几何体正面
+				programInfo: objProgramWithLignt,
+				bufferInfo: objectBufferInfo.get(objectKey),
+				uniforms: objectUniforms,
 				renderOption: {
-					disableDepth: false,
-					disableDepthWrite: false,
-					depthFunc: gl.ALWAYS
+					cullFace: gl.BACK,
 				}
 			}
 		).set(
-		// 	'drawFrontObject', {
-		// 		// 画几何体正面
-		// 		programInfo: objProgramWithLignt,
-		// 		bufferInfo: objectBufferInfo.get(objectKey),
-		// 		uniforms: objectUniforms,
-		// 		renderOption: {
-		// 			clearDepth: true,
-		// 			cullFace: gl.BACK,
-		// 		}
-		// 	}
-		// ).set(
 			'drawFrontPlane', {
 				// 画在几何体前的平面
 				programInfo: objProgramWithoutLight,
@@ -506,74 +513,15 @@ async function main() {
 					stencilFunc: [gl.NOTEQUAL, 1, 0xFF],
 				}
 			}
-		).set(
-			'drawClippingPlane', {
-				// 画切面
-				programInfo: objProgramWithoutLight,
-				bufferInfo: planeBufferInfo,
-				uniforms: planeInnerUniforms,
-				renderOption: {
-					disableDepth: true,
-					useStencil: true,
-					stencilOp: [gl.KEEP, gl.KEEP, gl.KEEP],
-					stencilFunc: [gl.EQUAL, 1, 0xFF],
-				}
-			}
 		);
 	}
 	
 	function changeObjectsMap(objectsMap, objectBuffer) {
-		objectsMap.set(
-			'fillDepthBuffer', {
-				// 填充几何体背面到深度缓冲
-				programInfo: objProgramWithLignt,
-				bufferInfo: objectBuffer,
-				uniforms: objectUniforms,
-				renderOption: {
-					disableColor: true,
-					cullFace: gl.FRONT,
-				}
-			}
-		).set(
-			'drawBackObject', {
-				// 画几何体背面
-				programInfo: objProgramWithLignt,
-				bufferInfo: objectBuffer,
-				uniforms: objectUniforms,
-				renderOption: {
-					disableDepth: true,
-					depthFunc: gl.LESS,
-					cullFace: gl.FRONT,
-				}
-			}
-		).set(
-			'fillModelBuffer', {
-				// 填充切面背后的几何体到模版缓冲
-				programInfo: clippingProgram,
-				bufferInfo: objectBuffer,
-				uniforms: objectClippedUniforms,
-				renderOption: {
-					clearDepth: true,
-					useStencil: true,
-					stencilWrite: true,
-					disableColor: true,
-					stencilBackOp: [gl.KEEP, gl.KEEP, gl.INCR],
-					stencilFrontOp: [gl.KEEP, gl.KEEP, gl.DECR],
-					stencilFunc: [gl.ALWAYS, 1, 0xFF],
-				}
-			}
-		).set(
-			'drawFrontObject', {
-				// 画几何体正面
-				programInfo: objProgramWithLignt,
-				bufferInfo: objectBuffer,
-				uniforms: objectUniforms,
-				renderOption: {
-					clearDepth: true,
-					cullFace: gl.BACK,
-				}
-			}
-		);
+		const changeList = ['fillDepthBuffer', 'drawBackObject', 'fillModelBuffer', 'drawFrontObject'];
+		for (let key of changeList) {
+			const drawnObject = objectsMap.get(key);
+			drawnObject.bufferInfo = objectBuffer;
+		}
 	}
 
 	function computeMatrix(viewProjectionMatrix, translation, rotation) {
