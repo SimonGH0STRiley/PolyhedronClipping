@@ -58,7 +58,6 @@ async function main() {
 		precision highp float;
 		
 		uniform vec4 u_color;
-
 		
 		void main() {
 			gl_FragColor = u_color;
@@ -114,13 +113,17 @@ async function main() {
 		}
 	`;
 
-	const objectProgram		= webglUtils.createProgramInfo(gl, [objectVS,	objectFS]);
-	const planeProgram		= webglUtils.createProgramInfo(gl, [planeVS,	planeFS]);
-	const clippingProgram	= webglUtils.createProgramInfo(gl, [clippingVS,	clippingFS]);
+	// A gl program to draw object with illumination.
+	const objProgramWithLignt		= webglUtils.createProgramInfo(gl, [objectVS,	objectFS]);
+	// A gl program to draw object without illumination.
+	const objProgramWithoutLight	= webglUtils.createProgramInfo(gl, [planeVS,	planeFS]);
+	// A gl program to draw the clipping plane.
+	const clippingProgram			= webglUtils.createProgramInfo(gl, [clippingVS,	clippingFS]);
 	
 	const glTFBuffer = await glTF.loadGLTFBuffer(gl, './cube.gltf');
 	const objectBufferInfo	= new Map ([
 		['cube',		glTFBuffer[0]],
+		['cubeEdge',	glTFBuffer[1]],
 		['cube1',		primitives.createCubeWithVertexColorsBufferInfo(gl, 10)],
 		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 16, 10, 16, 10, 10)],
 		['slinder',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 5, 5, 10)],
@@ -128,8 +131,6 @@ async function main() {
 		['trun-cone',	primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 3, 7.5, 10)],
 		['tri-prism',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 10, 10, 10)],
 	]);
-	console.log("cube", objectBufferInfo.get('cube'));
-	console.log("cube1", objectBufferInfo.get('cube1'));
 	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());
 
 	// 与摄像机有关的常量
@@ -387,6 +388,10 @@ async function main() {
 		u_normalMatrix: null,
 		u_lightPosition: null
 	};
+	let objectEdgeUniforms = {
+		u_modelViewProjectionMatrix: null,
+		u_color: [0.0, 0.0, 0.0, 1.0]
+	}
 	let objectClippedUniforms = {
 		u_modelMatrix: null,
 		u_viewMatrix: null,
@@ -406,50 +411,16 @@ async function main() {
 
 	let objectsMapToDraw = new Map ();
 	initObjectsMap(objectsMapToDraw, currentObjectKey);
-	console.log('obj2draw', objectsMapToDraw.get('fillDepthBuffer'))
 
 	function degToRad(d) {
 		return d * Math.PI / 180;
 	}
 
+	console.log(objectBufferInfo.get(currentObjectKey + 'Edge'))
+
 	function initObjectsMap(objectsMap, objectKey) {
 		objectsMap.clear();
 		objectsMap.set(
-			'fillDepthBuffer', {
-				// 填充几何体背面到深度缓冲
-				programInfo: objectProgram,
-				bufferInfo: objectBufferInfo.get(objectKey),
-				uniforms: objectUniforms,
-				renderOption: {
-					disableColor: true,
-					cullFace: gl.FRONT,
-				}
-			}
-		).set(
-			'drawBackPlane', {
-				// 画在几何体后的平面
-				programInfo: planeProgram,
-				bufferInfo: planeBufferInfo,
-				uniforms: planeUniforms,
-				renderOption: {
-					disableColor: false,
-					disableDepthWrite: true,
-					depthFunc: gl.GREATER,
-				}
-			}
-		).set(
-			'drawBackObject', {
-				// 画几何体背面
-				programInfo: objectProgram,
-				bufferInfo: objectBufferInfo.get(objectKey),
-				uniforms: objectUniforms,
-				renderOption: {
-					disableDepth: true,
-					depthFunc: gl.LESS,
-					cullFace: gl.FRONT,
-				}
-			}
-		).set(
 			'fillModelBuffer', {
 				// 填充切面背后的几何体到模版缓冲
 				programInfo: clippingProgram,
@@ -466,20 +437,67 @@ async function main() {
 				}
 			}
 		).set(
-			'drawFrontObject', {
-				// 画几何体正面
-				programInfo: objectProgram,
+			'fillDepthBuffer', {
+				// 填充几何体背面到深度缓冲
+				programInfo: objProgramWithLignt,
 				bufferInfo: objectBufferInfo.get(objectKey),
 				uniforms: objectUniforms,
 				renderOption: {
-					clearDepth: true,
-					cullFace: gl.BACK,
+					disableColor: true,
+					cullFace: gl.FRONT,
 				}
 			}
 		).set(
+			'drawBackPlane', {
+				// 画在几何体后的平面
+				programInfo: objProgramWithoutLight,
+				bufferInfo: planeBufferInfo,
+				uniforms: planeUniforms,
+				renderOption: {
+					disableColor: false,
+					disableDepthWrite: true,
+					depthFunc: gl.GREATER,
+				}
+			}
+		).set(
+		// 	'drawBackObject', {
+		// 		// 画几何体背面
+		// 		programInfo: objProgramWithLignt,
+		// 		bufferInfo: objectBufferInfo.get(objectKey),
+		// 		uniforms: objectUniforms,
+		// 		renderOption: {
+		// 			disableDepth: true,
+		// 			depthFunc: gl.LESS,
+		// 			cullFace: gl.FRONT,
+		// 		}
+		// 	}
+		// ).set(
+			'drawObjectEdge', {
+				// 画边框
+				programInfo: objProgramWithoutLight,
+				bufferInfo: objectBufferInfo.get(objectKey + 'Edge'),
+				uniforms: objectEdgeUniforms,
+				renderOption: {
+					disableDepth: false,
+					disableDepthWrite: false,
+					depthFunc: gl.ALWAYS
+				}
+			}
+		).set(
+		// 	'drawFrontObject', {
+		// 		// 画几何体正面
+		// 		programInfo: objProgramWithLignt,
+		// 		bufferInfo: objectBufferInfo.get(objectKey),
+		// 		uniforms: objectUniforms,
+		// 		renderOption: {
+		// 			clearDepth: true,
+		// 			cullFace: gl.BACK,
+		// 		}
+		// 	}
+		// ).set(
 			'drawFrontPlane', {
 				// 画在几何体前的平面
-				programInfo: planeProgram,
+				programInfo: objProgramWithoutLight,
 				bufferInfo: planeBufferInfo,
 				uniforms: planeUniforms,
 				renderOption: {
@@ -491,7 +509,7 @@ async function main() {
 		).set(
 			'drawClippingPlane', {
 				// 画切面
-				programInfo: planeProgram,
+				programInfo: objProgramWithoutLight,
 				bufferInfo: planeBufferInfo,
 				uniforms: planeInnerUniforms,
 				renderOption: {
@@ -508,7 +526,7 @@ async function main() {
 		objectsMap.set(
 			'fillDepthBuffer', {
 				// 填充几何体背面到深度缓冲
-				programInfo: objectProgram,
+				programInfo: objProgramWithLignt,
 				bufferInfo: objectBuffer,
 				uniforms: objectUniforms,
 				renderOption: {
@@ -519,7 +537,7 @@ async function main() {
 		).set(
 			'drawBackObject', {
 				// 画几何体背面
-				programInfo: objectProgram,
+				programInfo: objProgramWithLignt,
 				bufferInfo: objectBuffer,
 				uniforms: objectUniforms,
 				renderOption: {
@@ -547,7 +565,7 @@ async function main() {
 		).set(
 			'drawFrontObject', {
 				// 画几何体正面
-				programInfo: objectProgram,
+				programInfo: objProgramWithLignt,
 				bufferInfo: objectBuffer,
 				uniforms: objectUniforms,
 				renderOption: {
@@ -688,6 +706,9 @@ async function main() {
 		const objectRotation	=  [ 0,  0,  0];
 
 		// 对每个物体计算矩阵，并且传入uniform
+		objectEdgeUniforms.u_modelViewProjectionMatrix = 
+		m4.scale(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), objectScale, objectScale, objectScale);
+
 		objectUniforms.u_modelViewProjectionMatrix = 
 			m4.scale(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), objectScale, objectScale, objectScale);
 		objectUniforms.u_normalMatrix	= m4.normalFromMat4(computeModelMatrix(objectTranslation, objectRotation));
@@ -696,10 +717,10 @@ async function main() {
 		planeUniforms.u_modelViewProjectionMatrix = planeInnerUniforms.u_modelViewProjectionMatrix =
 			m4.multiply(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), planeTransformMatrix);
 
-		objectClippedUniforms.u_modelMatrix					= computeModelMatrix(objectTranslation, objectRotation);
+		objectClippedUniforms.u_modelMatrix					= m4.scale(computeModelMatrix(objectTranslation, objectRotation), objectScale, objectScale, objectScale);
 		objectClippedUniforms.u_viewMatrix					= viewMatrix;
 		objectClippedUniforms.u_modelViewMatrix				= m4.multiply(viewMatrix, objectClippedUniforms.u_modelMatrix);
-		objectClippedUniforms.u_modelViewProjectionMatrix	= m4.scale(m4.multiply(projectionMatrix, objectClippedUniforms.u_modelViewMatrix), objectScale, objectScale, objectScale);
+		objectClippedUniforms.u_modelViewProjectionMatrix	= m4.multiply(projectionMatrix, objectClippedUniforms.u_modelViewMatrix);
 		objectClippedUniforms.u_viewNormalMatrix			= viewNormalMatrix;
 		objectClippedUniforms.u_clippingPlane				= computeClippingPlane(clippingPlane, objectTranslation, objectRotation);
 		
@@ -746,7 +767,7 @@ async function main() {
 				if (renderOption.depthFunc) {
 					gl.depthFunc(renderOption.depthFunc);
 				} else {
-					gl.depthMask(gl.LESS);
+					gl.depthFunc(gl.LESS);
 				}
 				if (renderOption.disableColor) {
 					gl.colorMask(false, false, false, false);
