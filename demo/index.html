@@ -20,12 +20,14 @@
 					<p>Select Object Here Below:</p>
 					<input type="radio" name="objectType" id="cube" checked>
 					<label for="cube">Cube</label>
+					<input type="radio" name="objectType" id="cone">
+					<label for="cone">Cone</label>
+					<input type="radio" name="objectType" id="complex">
+					<label for="complex">Complex</label>
 					<input type="radio" name="objectType" id="prism">
 					<label for="prism">Prism</label>
 					<input type="radio" name="objectType" id="slinder">
 					<label for="slinder">Slinder</label>
-					<input type="radio" name="objectType" id="cone">
-					<label for="cone">Cone</label>
 					<input type="radio" name="objectType" id="trun-cone">
 					<label for="trun-cone">Truncated Cone</label>
 					<input type="radio" name="objectType" id="tri-prism">
@@ -50,6 +52,16 @@
 						<option value="ordinaryPentagon">不规则五边形</option>
 						<option value="ordinaryHexagon">不规则六边形</option>
 						<option value="regularHexagon">正六边形</option>
+					</select>
+					<select name="planeSelector" id="cone-plane" style="display: none;">
+						<option value="" selected disabled>--Choose plane here--</option>
+						<option value="circle">圆</option>
+						<option value="ellipse">椭圆</option>
+						<option value="curveStraight">曲线+直线</option>
+						<option value="isoscelesTriangle">等腰三角形</option>
+					</select>
+					<select name="planeSelector" id="complex-plane" style="display: none;">
+						<option value="" selected disabled>--Choose plane here--</option>
 					</select>
 					<select name="planeSelector" id="prism-plane" style="display: none;">
 						<option value="" selected disabled>--Choose plane here--</option>
@@ -76,13 +88,6 @@
 						<option value="rectangle1">矩形</option>
 						<option value="rectangle2">矩形</option>
 						<option value="drumShape">鼓形</option>
-					</select>
-					<select name="planeSelector" id="cone-plane" style="display: none;">
-						<option value="" selected disabled>--Choose plane here--</option>
-						<option value="circle">圆</option>
-						<option value="ellipse">椭圆</option>
-						<option value="curveStraight">曲线+直线</option>
-						<option value="isoscelesTriangle">等腰三角形</option>
 					</select>
 					<select name="planeSelector" id="trun-cone-plane" style="display: none;">
 						<option value="" selected disabled>--Choose plane here--</option>

@@ -8,8 +8,8 @@ async function main() {
 		return;
 	}
 
-	// Object vertex shader program
-	const objectVS = `
+	// Object vertex shader program with illumination
+	const objectLightVS = `
 		attribute vec4 a_position;
 		attribute vec3 a_normal;
 		
@@ -23,8 +23,8 @@ async function main() {
 			v_normal = u_normalMatrix * a_normal;
 		}
 	`;
-	// Object fragment shader program
-	const objectFS = `
+	// Object fragment shader program with illumination
+	const objectLightFS = `
 		precision highp float;
 		
 		uniform vec4 u_color;
@@ -40,8 +40,8 @@ async function main() {
 			gl_FragColor.a = u_color.a;
 		}
 	`;
-	// Plane vertex shader program
-	const planeVS = `
+	// Object vertex shader program without illumination
+	const objectVS = `
 		attribute vec4 a_position;
 		attribute vec3 a_normal;
 		
@@ -53,8 +53,8 @@ async function main() {
 			gl_Position = u_modelViewProjectionMatrix * a_position;
 		}
 	`;
-	// Planefragment shader program
-	const planeFS = `
+	// Planefragment shader program without illumination
+	const objectFS = `
 		precision highp float;
 		
 		uniform vec4 u_color;
@@ -65,7 +65,7 @@ async function main() {
 		}
 	`;
 	// Clipping vertex shader program
-	const clippingVS = `
+	const clippedObjectVS = `
 		attribute vec4 a_position;
 		
 		uniform mat4 u_modelViewMatrix;
@@ -79,7 +79,7 @@ async function main() {
 		}
 	`;
 	// Clipping fragment shader program
-	const clippingFS = `
+	const clippedObjectFS = `
 		precision highp float;
 		
 		uniform mat4 u_viewMatrix;
@@ -114,22 +114,26 @@ async function main() {
 	`;
 
 	// A gl program to draw object with illumination.
-	const objProgramWithLignt		= webglUtils.createProgramInfo(gl, [objectVS,	objectFS]);
+	const objectProgramWithLight	= webglUtils.createProgramInfo(gl, [objectLightVS,	objectLightFS]);
 	// A gl program to draw object without illumination.
-	const objProgramWithoutLight	= webglUtils.createProgramInfo(gl, [planeVS,	planeFS]);
-	// A gl program to draw the clipping plane.
-	const clippingProgram			= webglUtils.createProgramInfo(gl, [clippingVS,	clippingFS]);
+	const objectProgramWithoutLight	= webglUtils.createProgramInfo(gl, [objectVS,		objectFS]);
+	// A gl program to draw the clipped object.
+	const clippedObjectProgram		= webglUtils.createProgramInfo(gl, [clippedObjectVS,clippedObjectFS]);
 	
-	const glTFBuffer = await glTF.loadGLTFBuffer(gl, './cube.gltf');
+	const cubeBuffer = await glTF.loadGLTFBuffer(gl, './gltf/cube.gltf');
+	const coneBuffer = await glTF.loadGLTFBuffer(gl, './gltf/cone.gltf');
+	const complexBuffer = await glTF.loadGLTFBuffer(gl, './gltf/yixing.gltf');
 	const objectBufferInfo	= new Map ([
-		['cube',		glTFBuffer[0]],
-		['cubeEdge',	glTFBuffer[1]],
-		['cube1',		primitives.createCubeWithVertexColorsBufferInfo(gl, 10)],
-		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 16, 10, 16, 10, 10)],
-		['slinder',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 5, 5, 10)],
-		['cone',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 0, 5, 10)],
-		['trun-cone',	primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 3, 7.5, 10)],
-		['tri-prism',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 10, 10, 10)],
+		['cube',		cubeBuffer[0]],
+		['cubeEdge',	cubeBuffer[1]],
+		['cone', 		coneBuffer[0]],
+		['coneEdge',	coneBuffer[1]],
+		['complex',		complexBuffer[0]],
+		['complexEdge',	complexBuffer[1]],
+		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 320, 200, 320, 200, 200)],
+		['slinder',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 100, 100, 200)],
+		['trun-cone',	primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 60, 150, 200)],
+		['tri-prism',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 200, 200, 200)]
 	]);
 	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());
 
@@ -145,7 +149,7 @@ async function main() {
 	// 与光源和物体有关的常量
 	const lightPosition			= m4.normalize([-3, 1, 2]);
 	const objectLength			= 10;
-	const objectScale			= 10 / 200;
+	const objectScale			= objectLength / 200;
 	const objectTranslation		= [  0,  0,  0];
 
 	let currentObjectKey = 'cube'; 
@@ -154,7 +158,12 @@ async function main() {
 		document.getElementsByName("objectType").forEach((curr) => {
 			if (curr.checked) {
 				currentObjectKey = curr.id;
-				changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey));
+				if (currentObjectKey === 'cube' || currentObjectKey === 'cone' || currentObjectKey === 'complex') {
+					changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey), objectBufferInfo.get(currentObjectKey + 'Edge'));
+				} else {
+					changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey));
+				}
+				
 			}
 		});
 		// 重设平面
@@ -416,14 +425,12 @@ async function main() {
 		return d * Math.PI / 180;
 	}
 
-	console.log(objectBufferInfo.get(currentObjectKey + 'Edge'))
-
 	function initObjectsMap(objectsMap, objectKey) {
 		objectsMap.clear();
 		objectsMap.set(
 			'fillModelBuffer', {
 				// 填充切面背后的几何体到模版缓冲
-				programInfo: clippingProgram,
+				programInfo: clippedObjectProgram,
 				bufferInfo: objectBufferInfo.get(objectKey),
 				uniforms: objectClippedUniforms,
 				renderOption: {
@@ -439,7 +446,7 @@ async function main() {
 		).set(
 			'fillDepthBuffer', {
 				// 填充几何体背面到深度缓冲
-				programInfo: objProgramWithLignt,
+				programInfo: objectProgramWithLight,
 				bufferInfo: objectBufferInfo.get(objectKey),
 				uniforms: objectUniforms,
 				renderOption: {
@@ -451,7 +458,7 @@ async function main() {
 		).set(
 			'drawBackPlane', {
 				// 画在几何体后的平面
-				programInfo: objProgramWithoutLight,
+				programInfo: objectProgramWithoutLight,
 				bufferInfo: planeBufferInfo,
 				uniforms: planeUniforms,
 				renderOption: {
@@ -463,7 +470,7 @@ async function main() {
 		).set(
 			'drawBackObject', {
 				// 画几何体背面
-				programInfo: objProgramWithLignt,
+				programInfo: objectProgramWithLight,
 				bufferInfo: objectBufferInfo.get(objectKey),
 				uniforms: objectUniforms,
 				renderOption: {
@@ -474,7 +481,7 @@ async function main() {
 		).set(
 			'drawClippingPlane', {
 				// 画切面
-				programInfo: objProgramWithoutLight,
+				programInfo: objectProgramWithoutLight,
 				bufferInfo: planeBufferInfo,
 				uniforms: planeInnerUniforms,
 				renderOption: {
@@ -487,14 +494,14 @@ async function main() {
 		).set(
 			'drawObjectEdge', {
 				// 画边框
-				programInfo: objProgramWithoutLight,
+				programInfo: objectProgramWithoutLight,
 				bufferInfo: objectBufferInfo.get(objectKey + 'Edge'),
-				uniforms: objectEdgeUniforms,
+				uniforms: objectEdgeUniforms
 			}
 		).set(
 			'drawFrontObject', {
 				// 画几何体正面
-				programInfo: objProgramWithLignt,
+				programInfo: objectProgramWithLight,
 				bufferInfo: objectBufferInfo.get(objectKey),
 				uniforms: objectUniforms,
 				renderOption: {
@@ -504,7 +511,7 @@ async function main() {
 		).set(
 			'drawFrontPlane', {
 				// 画在几何体前的平面
-				programInfo: objProgramWithoutLight,
+				programInfo: objectProgramWithoutLight,
 				bufferInfo: planeBufferInfo,
 				uniforms: planeUniforms,
 				renderOption: {
@@ -516,11 +523,24 @@ async function main() {
 		);
 	}
 	
-	function changeObjectsMap(objectsMap, objectBuffer) {
+	function changeObjectsMap(objectsMap, objectBuffer, objectEdgeBuffer) {
 		const changeList = ['fillDepthBuffer', 'drawBackObject', 'fillModelBuffer', 'drawFrontObject'];
 		for (let key of changeList) {
 			const drawnObject = objectsMap.get(key);
 			drawnObject.bufferInfo = objectBuffer;
+		}
+		if (objectEdgeBuffer) {
+			if (objectsMapToDraw.get('drawObjectEdge')) {
+				objectsMapToDraw.get('drawObjectEdge').bufferInfo = objectEdgeBuffer;
+			} else {
+				objectsMapToDraw.set('drawObjectEdge', {
+					programInfo: objectProgramWithoutLight,
+					bufferInfo: objectEdgeBuffer,
+					uniforms: objectEdgeUniforms
+				});
+			}
+		} else {
+			objectsMapToDraw.delete('drawObjectEdge');
 		}
 	}
 

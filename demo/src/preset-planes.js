@@ -582,6 +582,16 @@
 			regularHexagon:		 cubeRegularHexagon,
 			default:			 defaultPlane
 		},
+		"cone": {
+			circle:				 coneCircle,
+			ellipse:			 coneEllipse,
+			curveStraight:		 coneCurveStraight,
+			isoscelesTriangle:	 coneIsoscelesTriangle,
+			default:			 defaultPlane
+		},
+		"complex": {
+			default:			defaultPlane
+		},
 		"prism": {
 			isoscelesTriangle:	 prismIsoscelesTriangle,
 			equilateralTriangle: prismEquilateralTriangle,
@@ -606,13 +616,6 @@
 			rectangle1:			 slinderRectangle1,
 			rectangle2:			 slinderRectangle2,
 			drumShape:			 slinderDrumShape,
-			default:			 defaultPlane
-		},
-		"cone": {
-			circle:				 coneCircle,
-			ellipse:			 coneEllipse,
-			curveStraight:		 coneCurveStraight,
-			isoscelesTriangle:	 coneIsoscelesTriangle,
 			default:			 defaultPlane
 		},
 		"trun-cone": {

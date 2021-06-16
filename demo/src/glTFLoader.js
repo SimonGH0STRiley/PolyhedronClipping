@@ -160,7 +160,6 @@
 				gltfBufferArray.push(bufferInfo);
 			})
 		});
-		console.log(gltfBufferArray)
 		return gltfBufferArray
 	}
 
