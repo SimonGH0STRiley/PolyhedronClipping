@@ -16,7 +16,7 @@
 	"nodes": [
 		{
 			"mesh": 0,
-			"name": "方块体",
+			"name": "长方体块",
 			"rotation": [
 				0.7071068286895752,
 				0,
@@ -26,7 +26,7 @@
 		},
 		{
 			"mesh": 1,
-			"name": "方块线",
+			"name": "长方体线",
 			"rotation": [
 				0.7071068286895752,
 				0,
@@ -59,7 +59,7 @@
 	],
 	"meshes": [
 		{
-			"name": "方块体",
+			"name": "长方体块",
 			"primitives": [
 				{
 					"attributes": {
@@ -73,7 +73,7 @@
 			]
 		},
 		{
-			"name": "方块线",
+			"name": "长方体线",
 			"primitives": [
 				{
 					"attributes": {
@@ -93,12 +93,12 @@
 			"componentType": 5126,
 			"count": 24,
 			"max": [
-				5,
+				8,
 				5,
 				5
 			],
 			"min": [
-				-5,
+				-8,
 				-5,
 				-5
 			],
@@ -125,35 +125,35 @@
 		{
 			"bufferView": 4,
 			"componentType": 5126,
-			"count": 229,
+			"count": 248,
 			"max": [
+				8.100000381469727,
 				5.099999904632568,
-				5.099999904632568,
-				5.099999904632568
+				5.090824604034424
 			],
 			"min": [
-				-5.099999904632568,
-				-5.099999904632568,
-				-5.099999904632568
+				-8.100000381469727,
+				-5.099938869476318,
+				-5.093644142150879
 			],
 			"type": "VEC3"
 		},
 		{
 			"bufferView": 5,
 			"componentType": 5126,
-			"count": 229,
+			"count": 248,
 			"type": "VEC3"
 		},
 		{
 			"bufferView": 6,
 			"componentType": 5126,
-			"count": 229,
+			"count": 248,
 			"type": "VEC2"
 		},
 		{
 			"bufferView": 7,
 			"componentType": 5123,
-			"count": 720,
+			"count": 528,
 			"type": "SCALAR"
 		}
 	],
@@ -180,29 +180,29 @@
 		},
 		{
 			"buffer": 0,
-			"byteLength": 2748,
+			"byteLength": 2976,
 			"byteOffset": 840
 		},
 		{
 			"buffer": 0,
-			"byteLength": 2748,
-			"byteOffset": 3588
+			"byteLength": 2976,
+			"byteOffset": 3816
 		},
 		{
 			"buffer": 0,
-			"byteLength": 1832,
-			"byteOffset": 6336
+			"byteLength": 1984,
+			"byteOffset": 6792
 		},
 		{
 			"buffer": 0,
-			"byteLength": 1440,
-			"byteOffset": 8168
+			"byteLength": 1056,
+			"byteOffset": 8776
 		}
 	],
 	"buffers": [
 		{
-			"uri": "cube_data.bin",
-			"byteLength": 9608
+			"uri": "cuboid_data.bin",
+			"byteLength": 9832
 		}
 	]
 }

@@ -582,17 +582,7 @@
 			regularHexagon:		 cubeRegularHexagon,
 			default:			 defaultPlane
 		},
-		"cone": {
-			circle:				 coneCircle,
-			ellipse:			 coneEllipse,
-			curveStraight:		 coneCurveStraight,
-			isoscelesTriangle:	 coneIsoscelesTriangle,
-			default:			 defaultPlane
-		},
-		"complex": {
-			default:			defaultPlane
-		},
-		"prism": {
+		"cuboid": {
 			isoscelesTriangle:	 prismIsoscelesTriangle,
 			equilateralTriangle: prismEquilateralTriangle,
 			prismatic:			 prismPrismatic,
@@ -608,7 +598,7 @@
 			ordinaryHexagon:	 prismOrdinaryHexagon,
 			default:			 defaultPlane
 		},
-		"slinder": {
+		"cylinder": {
 			circle: 			 slinderCircle,
 			ellipse:			 slinderEllipse,
 			curveStraight1:		 slinderCurveStraight1,
@@ -618,6 +608,13 @@
 			drumShape:			 slinderDrumShape,
 			default:			 defaultPlane
 		},
+		"cone": {
+			circle:				 coneCircle,
+			ellipse:			 coneEllipse,
+			curveStraight:		 coneCurveStraight,
+			isoscelesTriangle:	 coneIsoscelesTriangle,
+			default:			 defaultPlane
+		},
 		"trun-cone": {
 			circle:				 truncatedConeCircle,
 			ellipse:			 truncatedConeEllipse,
@@ -625,7 +622,7 @@
 			isoscelesTrapezoid:	 truncatedConeIsoscelesTrapezoid,
 			default:			 defaultPlane
 		},
-		"tri-prism": {
+		"prism": {
 			triangle1:			 triangularPrismTriangle1,
 			triangle2:			 triangularPrismTriangle2,
 			rectangle1:			 triangularPrismRectangle1,
@@ -633,7 +630,9 @@
 			trapezoid:			 triangularPrismTrapezoid,
 			ordinaryPentagon:	 triangularPrismOrdinaryPentagon,
 			default:			 defaultPlane
+		},
+		"complex": {
+			default:			defaultPlane
 		}
-
     }
 }));

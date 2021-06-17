@@ -196,11 +196,11 @@ function main() {
 	const objectBufferInfo	= new Map ([
 		['cube',		primitives.createCubeWithVertexColorsBufferInfo(gl, 10)],
 		['sphere',		primitives.createSphereWithVertexColorsBufferInfo(gl, 5)],
-		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 8, 10, 8, 10, 10)],
-		['tri-prism',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 10, 10, 10)],
+		['cuboid',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 8, 10, 8, 10, 10)],
+		['prism',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 10, 10, 10)],
 		['pyramid',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 0, 0, 10, 10, 10)],
 		['tri-pyramid',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 0, 15, 10)],
-		['slinder',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 5, 5, 10)],
+		['cylinder',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 5, 5, 10)],
 		['cone',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 0, 5, 10)],
 	]);
 	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());

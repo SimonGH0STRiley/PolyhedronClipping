@@ -16,7 +16,7 @@
 	"nodes": [
 		{
 			"mesh": 0,
-			"name": "方块体",
+			"name": "圆柱体块",
 			"rotation": [
 				0.7071068286895752,
 				0,
@@ -26,7 +26,7 @@
 		},
 		{
 			"mesh": 1,
-			"name": "方块线",
+			"name": "圆柱体线",
 			"rotation": [
 				0.7071068286895752,
 				0,
@@ -59,7 +59,7 @@
 	],
 	"meshes": [
 		{
-			"name": "方块体",
+			"name": "圆柱体块",
 			"primitives": [
 				{
 					"attributes": {
@@ -73,7 +73,7 @@
 			]
 		},
 		{
-			"name": "方块线",
+			"name": "圆柱体线",
 			"primitives": [
 				{
 					"attributes": {
@@ -91,7 +91,7 @@
 		{
 			"bufferView": 0,
 			"componentType": 5126,
-			"count": 24,
+			"count": 196,
 			"max": [
 				5,
 				5,
@@ -107,102 +107,102 @@
 		{
 			"bufferView": 1,
 			"componentType": 5126,
-			"count": 24,
+			"count": 196,
 			"type": "VEC3"
 		},
 		{
 			"bufferView": 2,
 			"componentType": 5126,
-			"count": 24,
+			"count": 196,
 			"type": "VEC2"
 		},
 		{
 			"bufferView": 3,
 			"componentType": 5123,
-			"count": 36,
+			"count": 576,
 			"type": "SCALAR"
 		},
 		{
 			"bufferView": 4,
 			"componentType": 5126,
-			"count": 229,
+			"count": 1038,
 			"max": [
-				5.099999904632568,
-				5.099999904632568,
-				5.099999904632568
+				5.10021448135376,
+				5.10021448135376,
+				5.086602687835693
 			],
 			"min": [
-				-5.099999904632568,
-				-5.099999904632568,
-				-5.099999904632568
+				-5.099785804748535,
+				-5.10021448135376,
+				-5.086602687835693
 			],
 			"type": "VEC3"
 		},
 		{
 			"bufferView": 5,
 			"componentType": 5126,
-			"count": 229,
+			"count": 1038,
 			"type": "VEC3"
 		},
 		{
 			"bufferView": 6,
 			"componentType": 5126,
-			"count": 229,
+			"count": 1038,
 			"type": "VEC2"
 		},
 		{
 			"bufferView": 7,
 			"componentType": 5123,
-			"count": 720,
+			"count": 3504,
 			"type": "SCALAR"
 		}
 	],
 	"bufferViews": [
 		{
 			"buffer": 0,
-			"byteLength": 288,
+			"byteLength": 2352,
 			"byteOffset": 0
 		},
 		{
 			"buffer": 0,
-			"byteLength": 288,
-			"byteOffset": 288
+			"byteLength": 2352,
+			"byteOffset": 2352
 		},
 		{
 			"buffer": 0,
-			"byteLength": 192,
-			"byteOffset": 576
+			"byteLength": 1568,
+			"byteOffset": 4704
 		},
 		{
 			"buffer": 0,
-			"byteLength": 72,
-			"byteOffset": 768
+			"byteLength": 1152,
+			"byteOffset": 6272
 		},
 		{
 			"buffer": 0,
-			"byteLength": 2748,
-			"byteOffset": 840
+			"byteLength": 12456,
+			"byteOffset": 7424
 		},
 		{
 			"buffer": 0,
-			"byteLength": 2748,
-			"byteOffset": 3588
+			"byteLength": 12456,
+			"byteOffset": 19880
 		},
 		{
 			"buffer": 0,
-			"byteLength": 1832,
-			"byteOffset": 6336
+			"byteLength": 8304,
+			"byteOffset": 32336
 		},
 		{
 			"buffer": 0,
-			"byteLength": 1440,
-			"byteOffset": 8168
+			"byteLength": 7008,
+			"byteOffset": 40640
 		}
 	],
 	"buffers": [
 		{
-			"uri": "cube_data.bin",
-			"byteLength": 9608
+			"uri": "cylinder_data.bin",
+			"byteLength": 47648
 		}
 	]
 }

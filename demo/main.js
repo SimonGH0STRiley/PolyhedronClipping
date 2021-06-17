@@ -120,20 +120,28 @@ async function main() {
 	// A gl program to draw the clipped object.
 	const clippedObjectProgram		= webglUtils.createProgramInfo(gl, [clippedObjectVS,clippedObjectFS]);
 	
-	const cubeBuffer = await glTF.loadGLTFBuffer(gl, './gltf/cube.gltf');
-	const coneBuffer = await glTF.loadGLTFBuffer(gl, './gltf/cone.gltf');
-	const complexBuffer = await glTF.loadGLTFBuffer(gl, './gltf/yixing.gltf');
+	const cubeBuffer		= await glTF.loadGLTFBuffer(gl, './gltf/cube.gltf');
+	const cuboidBuffer		= await glTF.loadGLTFBuffer(gl, './gltf/cuboid.gltf');
+	const cylinderBuffer	= await glTF.loadGLTFBuffer(gl, './gltf/cylinder.gltf');
+	const coneBuffer		= await glTF.loadGLTFBuffer(gl, './gltf/cone.gltf');
+	const trunConeBuffer 	= await glTF.loadGLTFBuffer(gl, './gltf/truncatedCone.gltf');
+	const prismBuffer		= await glTF.loadGLTFBuffer(gl, './gltf/prism.gltf');
+	const complexBuffer		= await glTF.loadGLTFBuffer(gl, './gltf/yixing.gltf');
 	const objectBufferInfo	= new Map ([
-		['cube',		cubeBuffer[0]],
-		['cubeEdge',	cubeBuffer[1]],
-		['cone', 		coneBuffer[0]],
-		['coneEdge',	coneBuffer[1]],
-		['complex',		complexBuffer[0]],
-		['complexEdge',	complexBuffer[1]],
-		['prism',		primitives.createTruncatedPyramidWithVertexColorsBufferInfo(gl, 320, 200, 320, 200, 200)],
-		['slinder',		primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 100, 100, 200)],
-		['trun-cone',	primitives.createTruncatedConeWithVertexColorsBufferInfo(gl, 60, 150, 200)],
-		['tri-prism',	primitives.createTruncatedRegularTriangularPyramidWithVertexColorsBufferInfo(gl, 200, 200, 200)]
+		['cube',			cubeBuffer[0]],
+		['cube-edge',		cubeBuffer[1]],
+		['cuboid',			cuboidBuffer[0]],
+		['cuboid-edge',		cuboidBuffer[1]],
+		['cylinder',		cylinderBuffer[0]],
+		['cylinder-edge',	cylinderBuffer[1]],
+		['cone', 			coneBuffer[0]],
+		['cone-edge',		coneBuffer[1]],
+		['trun-cone',		trunConeBuffer[0]],
+		['trun-cone-edge',	trunConeBuffer[1]],
+		['prism',			prismBuffer[0]],
+		['prism-edge',		prismBuffer[1]],
+		['complex',			complexBuffer[0]],
+		['complex-edge',	complexBuffer[1]],
 	]);
 	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());
 
@@ -149,7 +157,7 @@ async function main() {
 	// 与光源和物体有关的常量
 	const lightPosition			= m4.normalize([-3, 1, 2]);
 	const objectLength			= 10;
-	const objectScale			= objectLength / 200;
+	const objectScale			= objectLength / 10;
 	const objectTranslation		= [  0,  0,  0];
 
 	let currentObjectKey = 'cube'; 
@@ -158,12 +166,7 @@ async function main() {
 		document.getElementsByName("objectType").forEach((curr) => {
 			if (curr.checked) {
 				currentObjectKey = curr.id;
-				if (currentObjectKey === 'cube' || currentObjectKey === 'cone' || currentObjectKey === 'complex') {
-					changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey), objectBufferInfo.get(currentObjectKey + 'Edge'));
-				} else {
-					changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey));
-				}
-				
+				changeObjectsMap(objectsMapToDraw, objectBufferInfo.get(currentObjectKey), objectBufferInfo.get(currentObjectKey + '-edge'));				
 			}
 		});
 		// 重设平面
@@ -497,7 +500,7 @@ async function main() {
 			'drawObjectEdge', {
 				// 画边框
 				programInfo: objectProgramWithoutLight,
-				bufferInfo: objectBufferInfo.get(objectKey + 'Edge'),
+				bufferInfo: objectBufferInfo.get(objectKey + '-edge'),
 				uniforms: objectEdgeUniforms,
 				renderOption: {
 					// clearDepth: true,
@@ -535,19 +538,7 @@ async function main() {
 			const drawnObject = objectsMap.get(key);
 			drawnObject.bufferInfo = objectBuffer;
 		}
-		if (objectEdgeBuffer) {
-			if (objectsMapToDraw.get('drawObjectEdge')) {
-				objectsMapToDraw.get('drawObjectEdge').bufferInfo = objectEdgeBuffer;
-			} else {
-				objectsMapToDraw.set('drawObjectEdge', {
-					programInfo: objectProgramWithoutLight,
-					bufferInfo: objectEdgeBuffer,
-					uniforms: objectEdgeUniforms
-				});
-			}
-		} else {
-			objectsMapToDraw.delete('drawObjectEdge');
-		}
+		objectsMapToDraw.get('drawObjectEdge').bufferInfo = objectEdgeBuffer;
 	}
 
 	function computeMatrix(viewProjectionMatrix, translation, rotation) {
@@ -681,17 +672,17 @@ async function main() {
 
 		// 对每个物体计算矩阵，并且传入uniform
 		objectEdgeUniforms.u_modelViewProjectionMatrix = 
-		m4.scale(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), objectScale, objectScale, objectScale);
+			m4.xRotate(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), Math.PI / 2);
 
 		objectUniforms.u_modelViewProjectionMatrix = 
-			m4.scale(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), objectScale, objectScale, objectScale);
+			m4.xRotate(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), Math.PI / 2);
 		objectUniforms.u_normalMatrix	= m4.normalFromMat4(computeModelMatrix(objectTranslation, objectRotation));
 		objectUniforms.u_lightPosition	= lightPosition;
 
 		planeUniforms.u_modelViewProjectionMatrix = planeInnerUniforms.u_modelViewProjectionMatrix =
 			m4.multiply(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), planeTransformMatrix);
 
-		objectClippedUniforms.u_modelMatrix					= m4.scale(computeModelMatrix(objectTranslation, objectRotation), objectScale, objectScale, objectScale);
+		objectClippedUniforms.u_modelMatrix					= m4.xRotate(computeModelMatrix(objectTranslation, objectRotation), Math.PI / 2);
 		objectClippedUniforms.u_viewMatrix					= viewMatrix;
 		objectClippedUniforms.u_modelViewMatrix				= m4.multiply(viewMatrix, objectClippedUniforms.u_modelMatrix);
 		objectClippedUniforms.u_modelViewProjectionMatrix	= m4.multiply(projectionMatrix, objectClippedUniforms.u_modelViewMatrix);
@@ -785,7 +776,7 @@ async function main() {
 			
 			// 绘制3D图形
 			if (bufferInfo.indices) {
-				gl.drawElements(gl.TRIANGLES, bufferInfo.numElements, gl.UNSIGNED_SHORT, bufferInfo)
+				gl.drawElements(gl.TRIANGLES, bufferInfo.numElements, gl.UNSIGNED_SHORT, 0)
 			} else {
 				gl.drawArrays(gl.TRIANGLES, 0, bufferInfo.numElements);
 			}
