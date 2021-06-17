@@ -127,6 +127,7 @@ async function main() {
 	const trunConeBuffer 	= await glTF.loadGLTFBuffer(gl, './gltf/truncatedCone.gltf');
 	const prismBuffer		= await glTF.loadGLTFBuffer(gl, './gltf/prism.gltf');
 	const complexBuffer		= await glTF.loadGLTFBuffer(gl, './gltf/yixing.gltf');
+	const planeBuffer		= await glTF.loadGLTFBuffer(gl, './gltf/plane.gltf');
 	const objectBufferInfo	= new Map ([
 		['cube',			cubeBuffer[0]],
 		['cube-edge',		cubeBuffer[1]],
@@ -140,10 +141,10 @@ async function main() {
 		['trun-cone-edge',	trunConeBuffer[1]],
 		['prism',			prismBuffer[0]],
 		['prism-edge',		prismBuffer[1]],
-		['complex',			complexBuffer[0]],
-		['complex-edge',	complexBuffer[1]],
+		['complex',			complexBuffer[1]],
+		['complex-edge',	complexBuffer[0]],
 	]);
-	const planeBufferInfo	= primitives.createPlaneWithVertexColorsBufferInfo(gl, 30, 30, 1, 1, m4.identity());
+	const planeBufferInfo	= planeBuffer[0]
 
 	// 与摄像机有关的常量
 	const cameraDistance		= 50;
@@ -157,7 +158,6 @@ async function main() {
 	// 与光源和物体有关的常量
 	const lightPosition			= m4.normalize([-3, 1, 2]);
 	const objectLength			= 10;
-	const objectScale			= objectLength / 10;
 	const objectTranslation		= [  0,  0,  0];
 
 	let currentObjectKey = 'cube'; 

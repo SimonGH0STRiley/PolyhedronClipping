@@ -16,64 +16,50 @@
   "nodes": [
     {
       "mesh": 0,
-      "name": "Cloth_Surface_2",
+      "name": "异形线",
       "rotation": [
         0.7071068286895752,
         0,
         0,
         0.7071067094802856
-      ],
-      "scale": [
-        0.009999999776482582,
-        0.009999999776482582,
-        0.009999999776482582
       ]
     },
     {
       "mesh": 1,
-      "name": "Sweep_1",
+      "name": "异形体",
       "rotation": [
         0.7071068286895752,
         0,
         0,
         0.7071067094802856
-      ],
-      "scale": [
-        0.009999999776482582,
-        0.009999999776482582,
-        0.009999999776482582
-      ],
-      "translation": [
-        0,
-        0,
-        -0.000002778863063213066
       ]
     }
   ],
   "materials": [
     {
       "doubleSided": true,
-      "name": "材质.001",
-      "pbrMetallicRoughness": {}
+      "name": "default",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "metallicFactor": 0
+      }
     },
     {
       "doubleSided": true,
-      "name": "材质",
+      "name": "default.001",
       "pbrMetallicRoughness": {
-        "baseColorFactor": [
-          0.002321729203686118,
-          0.002321729203686118,
-          0.002321729203686118,
-          1
-        ],
-        "metallicFactor": 0,
-        "roughnessFactor": 0.5
+        "metallicFactor": 0
       }
     }
   ],
   "meshes": [
     {
-      "name": "网格",
+      "name": "异形线",
       "primitives": [
         {
           "attributes": {
@@ -87,7 +73,7 @@
       ]
     },
     {
-      "name": "网格.001",
+      "name": "异形体",
       "primitives": [
         {
           "attributes": {
@@ -105,112 +91,112 @@
     {
       "bufferView": 0,
       "componentType": 5126,
-      "count": 292,
+      "count": 747,
       "max": [
-        170,
-        75,
-        0
+        8.550000190734863,
+        3.8002917766571045,
+        0.04998435080051422
       ],
       "min": [
-        -170,
-        -75,
-        -205.63485717773438
+        -8.550555229187012,
+        -3.7997360229492188,
+        -10.360185623168945
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 1,
       "componentType": 5126,
-      "count": 292,
+      "count": 747,
       "type": "VEC3"
     },
     {
       "bufferView": 2,
       "componentType": 5126,
-      "count": 292,
+      "count": 747,
       "type": "VEC2"
     },
     {
       "bufferView": 3,
       "componentType": 5123,
-      "count": 924,
+      "count": 3348,
       "type": "SCALAR"
     },
     {
       "bufferView": 4,
       "componentType": 5126,
-      "count": 747,
+      "count": 292,
       "max": [
-        171.0111083984375,
-        76.00027465820312,
-        0.9996870160102844
+        8.5,
+        3.75,
+        0
       ],
       "min": [
-        -171,
-        -76.00027465820312,
-        -207.20372009277344
+        -8.5,
+        -3.75,
+        -10.281743049621582
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 5,
       "componentType": 5126,
-      "count": 747,
+      "count": 292,
       "type": "VEC3"
     },
     {
       "bufferView": 6,
       "componentType": 5126,
-      "count": 747,
+      "count": 292,
       "type": "VEC2"
     },
     {
       "bufferView": 7,
       "componentType": 5123,
-      "count": 3348,
+      "count": 924,
       "type": "SCALAR"
     }
   ],
   "bufferViews": [
     {
       "buffer": 0,
-      "byteLength": 3504,
+      "byteLength": 8964,
       "byteOffset": 0
     },
     {
       "buffer": 0,
-      "byteLength": 3504,
-      "byteOffset": 3504
-    },
-    {
-      "buffer": 0,
-      "byteLength": 2336,
-      "byteOffset": 7008
-    },
-    {
-      "buffer": 0,
-      "byteLength": 1848,
-      "byteOffset": 9344
-    },
-    {
-      "buffer": 0,
       "byteLength": 8964,
-      "byteOffset": 11192
-    },
-    {
-      "buffer": 0,
-      "byteLength": 8964,
-      "byteOffset": 20156
+      "byteOffset": 8964
     },
     {
       "buffer": 0,
       "byteLength": 5976,
-      "byteOffset": 29120
+      "byteOffset": 17928
     },
     {
       "buffer": 0,
       "byteLength": 6696,
-      "byteOffset": 35096
+      "byteOffset": 23904
+    },
+    {
+      "buffer": 0,
+      "byteLength": 3504,
+      "byteOffset": 30600
+    },
+    {
+      "buffer": 0,
+      "byteLength": 3504,
+      "byteOffset": 34104
+    },
+    {
+      "buffer": 0,
+      "byteLength": 2336,
+      "byteOffset": 37608
+    },
+    {
+      "buffer": 0,
+      "byteLength": 1848,
+      "byteOffset": 39944
     }
   ],
   "buffers": [
