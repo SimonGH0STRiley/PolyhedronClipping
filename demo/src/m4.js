@@ -70,7 +70,7 @@
 	 */
 	
 	
-	let MatType = Float32Array;
+	let MatType = Array; // Float32Array;
 	
 	/**
 	 * Sets the type this library creates for a Mat4
@@ -1477,6 +1477,7 @@
 	function transformVector(m, v, dst) {
 		dst = dst || new MatType(4);
 		for (var i = 0; i < 4; ++i) {
+			dst[i] = 0.0;
 			for (var j = 0; j < 4; ++j) {
 				dst[i] += v[j] * m[j * 4 + i];
 			}
