@@ -148,9 +148,9 @@ async function main() {
 
 	// 与摄像机有关的常量
 	const cameraDistance		= 50;
-	const targetPosition		= [0, 0, 0];
+	const targetPosition		= [ 0, 0, 0];
 	const defaultCameraNormal	= m4.normalize([20, 20, 50]);
-	const upNormal				= [0, 1, 0];
+	const upNormal				= [ 0, 1, 0];
 	const horizontalOffset		= gl.canvas.clientWidth / 40;
 	const verticalOffset		= gl.canvas.clientHeight / 40;
 	const nearOffset			= 1;
@@ -158,7 +158,8 @@ async function main() {
 	// 与光源和物体有关的常量
 	const lightPosition			= m4.normalize([-3, 1, 2]);
 	const objectLength			= 10;
-	const objectTranslation		= [  0,  0,  0];
+	const objectTranslation		= [ 0, 0, 0];
+	const objectRotation		= [ Math.PI / 2, 0, 0];
 
 	let currentObjectKey = 'cube'; 
 	document.getElementById("objectList").addEventListener("change", () => {
@@ -667,27 +668,24 @@ async function main() {
 
 		const clippingPlane		= m4.transformVector(m4.inverse(m4.transpose(planeTransformMatrix)), m4.createVec4FromValues(0, 1, 0, 0));
 
-		// 计算动画
-		const objectRotation	=  [ 0,  0,  0];
-
 		// 对每个物体计算矩阵，并且传入uniform
 		objectEdgeUniforms.u_modelViewProjectionMatrix = 
-			m4.xRotate(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), Math.PI / 2);
+			computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation);
 
 		objectUniforms.u_modelViewProjectionMatrix = 
-			m4.xRotate(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), Math.PI / 2);
+			computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation);
 		objectUniforms.u_normalMatrix	= m4.normalFromMat4(computeModelMatrix(objectTranslation, objectRotation));
 		objectUniforms.u_lightPosition	= lightPosition;
 
 		planeUniforms.u_modelViewProjectionMatrix = planeInnerUniforms.u_modelViewProjectionMatrix =
-			m4.multiply(computeMatrix(viewProjectionMatrix, objectTranslation, objectRotation), planeTransformMatrix);
+			m4.multiply(computeMatrix(viewProjectionMatrix, objectTranslation, [0,0,0]), planeTransformMatrix);
 
-		objectClippedUniforms.u_modelMatrix					= m4.xRotate(computeModelMatrix(objectTranslation, objectRotation), Math.PI / 2);
+		objectClippedUniforms.u_modelMatrix					= computeModelMatrix(objectTranslation, objectRotation);
 		objectClippedUniforms.u_viewMatrix					= viewMatrix;
 		objectClippedUniforms.u_modelViewMatrix				= m4.multiply(viewMatrix, objectClippedUniforms.u_modelMatrix);
 		objectClippedUniforms.u_modelViewProjectionMatrix	= m4.multiply(projectionMatrix, objectClippedUniforms.u_modelViewMatrix);
 		objectClippedUniforms.u_viewNormalMatrix			= viewNormalMatrix;
-		objectClippedUniforms.u_clippingPlane				= computeClippingPlane(clippingPlane, objectTranslation, objectRotation);
+		objectClippedUniforms.u_clippingPlane				= computeClippingPlane(clippingPlane, objectTranslation, [0, 0, 0]);
 		
 		// 在这里画物体
 		objectsMapToDraw.forEach(function(object) {
