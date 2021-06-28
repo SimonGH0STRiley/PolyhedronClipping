@@ -24,19 +24,19 @@
 		}
 	}
 
-	function cubeIsoscelesTriangle (length) {
-		const offset = length * (3 / 10);
+	function cubeEquilateralTriangle (length) {
+		const offset = length * (5 / 30);
 		return {
 			xTranslation:	 offset,
 			yTranslation:	 offset,
 			zTranslation:	 offset,
-			xRotation:		radToDeg(Math.acos(Math.sqrt(1 / 5))),
+			xRotation:		radToDeg( Math.acos(Math.sqrt(1 / 5))),
 			zRotation:		radToDeg(-Math.asin(2 / 3))
 		};
 	}
 
-	function cubeEquilateralTriangle (length) {
-		const offset = length * (5 / 30);
+	function cubeIsoscelesTriangle (length) {
+		const offset = length * (3 / 10);
 		return {
 			xTranslation:	 offset,
 			yTranslation:	 offset,
@@ -189,8 +189,8 @@
 		};
 	}
 
-	function prismIsoscelesTriangle (length) {
-		const offset = length * (21 / 50);
+	function cuboidEquilateralTriangle (length) {
+		const offset = length * (8 / 30);
 		return {
 			xTranslation:	 offset,
 			yTranslation:	 offset,
@@ -200,8 +200,8 @@
 		};
 	}
 
-	function prismEquilateralTriangle (length) {
-		const offset = length * (8 / 30);
+	function cuboidIsoscelesTriangle (length) {
+		const offset = length * (21 / 50);
 		return {
 			xTranslation:	 offset,
 			yTranslation:	 offset,
@@ -211,7 +211,7 @@
 		};
 	}
 
-	function prismPrismatic (length) {
+	function cuboidPrismatic (length) {
 		const offset = length * 0;
 		return {
 			xTranslation:	 offset,
@@ -222,7 +222,7 @@
 		};
 	}
 
-	function prismIsoscelesTrapezoid (length) {
+	function cuboidIsoscelesTrapezoid (length) {
 		const offset = length * (40 / 70);
 		return {
 			xTranslation:	 offset,
@@ -233,7 +233,7 @@
 		};
 	}
 
-	function prismOrdinaryTrapezoid (length) {
+	function cuboidOrdinaryTrapezoid (length) {
 		const offset = length * (65 / 330);
 		return {
 			xTranslation:	 offset,
@@ -244,7 +244,7 @@
 		};
 	}
 
-	function prismSquare (length) {
+	function cuboidSquare (length) {
 		const offset = length * 0;
 		return {
 			xTranslation:	 offset,
@@ -255,7 +255,7 @@
 		};
 	}
 
-	function prismRectangle1 (length) {
+	function cuboidRectangle1 (length) {
 		const offset = length * 0;
 		return {
 			xTranslation:	 offset,
@@ -266,7 +266,7 @@
 		};
 	}
 
-	function prismRectangle2 (length) {
+	function cuboidRectangle2 (length) {
 		const offset = length * 0;
 		return {
 			xTranslation:	 offset,
@@ -277,7 +277,7 @@
 		};
 	}
 
-	function prismRectangle3 (length) {
+	function cuboidRectangle3 (length) {
 		const offset = length * 0;
 		return {
 			xTranslation:	 offset,
@@ -288,7 +288,7 @@
 		};
 	}
 
-	function prismRectangle4 (length) {
+	function cuboidRectangle4 (length) {
 		const offset = length * - (2 / 5);
 		return {
 			xTranslation:	 offset,
@@ -299,7 +299,7 @@
 		};
 	}
 
-	function prismParallelogram (length) {
+	function cuboidParallelogram (length) {
 		const offset = length * (0);
 		return {
 			xTranslation:	 offset,
@@ -310,7 +310,7 @@
 		};
 	}
 
-	function prismOrdinaryPentagon (length) {
+	function cuboidOrdinaryPentagon (length) {
 		const offset = length * - (40 / 1530);
 		return {
 			xTranslation:	 offset,
@@ -321,7 +321,7 @@
 		};
 	}
 
-	function prismOrdinaryHexagon (length) {
+	function cuboidOrdinaryHexagon (length) {
 		const offset = length * - (5 / 60);
 		return {
 			xTranslation:	 offset,
@@ -497,7 +497,7 @@
 		};
 	}
 
-	function triangularPrismTriangle1 (height) {
+	function prismTriangle1 (height) {
 		const offset = height * 0;
 		return {
 			xTranslation:	 offset,
@@ -508,7 +508,7 @@
 		};
 	}
 
-	function triangularPrismTriangle2 (height) {
+	function prismTriangle2 (height) {
 		const offset = height * - (5 / 30);
 		return {
 			xTranslation:	 0,
@@ -519,7 +519,7 @@
 		};
 	}
 
-	function triangularPrismRectangle1 (height) {
+	function prismRectangle1 (height) {
 		const offset = height * (5 / 30);
 		return {
 			xTranslation:	 offset,
@@ -530,7 +530,7 @@
 		};
 	}
 
-	function triangularPrismRectangle2 (height) {
+	function prismRectangle2 (height) {
 		const offset = height * 0;
 		return {
 			xTranslation:	 offset,
@@ -541,7 +541,7 @@
 		};
 	}
 
-	function triangularPrismTrapezoid (height) {
+	function prismTrapezoid (height) {
 		const offset = height * 0;
 		return {
 			xTranslation:	 offset,
@@ -552,7 +552,7 @@
 		};
 	}
 
-	function triangularPrismOrdinaryPentagon (height) {
+	function prismOrdinaryPentagon (height) {
 		const offset = height * 0;
 		return {
 			xTranslation:	 offset,
@@ -583,19 +583,19 @@
 			default:			 defaultPlane
 		},
 		"cuboid": {
-			isoscelesTriangle:	 prismIsoscelesTriangle,
-			equilateralTriangle: prismEquilateralTriangle,
-			prismatic:			 prismPrismatic,
-			isoscelesTrapezoid:	 prismIsoscelesTrapezoid,
-			ordinaryTrapezoid:	 prismOrdinaryTrapezoid,
-			square:				 prismSquare,
-			rectangle1:			 prismRectangle1,
-			rectangle2:			 prismRectangle2,
-			rectangle3:			 prismRectangle3,
-			rectangle4:			 prismRectangle4,
-			parallelogram:		 prismParallelogram,
-			ordinaryPentagon:	 prismOrdinaryPentagon,
-			ordinaryHexagon:	 prismOrdinaryHexagon,
+			isoscelesTriangle:	 cuboidIsoscelesTriangle,
+			equilateralTriangle: cuboidEquilateralTriangle,
+			prismatic:			 cuboidPrismatic,
+			isoscelesTrapezoid:	 cuboidIsoscelesTrapezoid,
+			ordinaryTrapezoid:	 cuboidOrdinaryTrapezoid,
+			square:				 cuboidSquare,
+			rectangle1:			 cuboidRectangle1,
+			rectangle2:			 cuboidRectangle2,
+			rectangle3:			 cuboidRectangle3,
+			rectangle4:			 cuboidRectangle4,
+			parallelogram:		 cuboidParallelogram,
+			ordinaryPentagon:	 cuboidOrdinaryPentagon,
+			ordinaryHexagon:	 cuboidOrdinaryHexagon,
 			default:			 defaultPlane
 		},
 		"cylinder": {
@@ -623,12 +623,12 @@
 			default:			 defaultPlane
 		},
 		"prism": {
-			triangle1:			 triangularPrismTriangle1,
-			triangle2:			 triangularPrismTriangle2,
-			rectangle1:			 triangularPrismRectangle1,
-			rectangle2:			 triangularPrismRectangle2,
-			trapezoid:			 triangularPrismTrapezoid,
-			ordinaryPentagon:	 triangularPrismOrdinaryPentagon,
+			triangle1:			 prismTriangle1,
+			triangle2:			 prismTriangle2,
+			rectangle1:			 prismRectangle1,
+			rectangle2:			 prismRectangle2,
+			trapezoid:			 prismTrapezoid,
+			ordinaryPentagon:	 prismOrdinaryPentagon,
 			default:			 defaultPlane
 		},
 		"complex": {

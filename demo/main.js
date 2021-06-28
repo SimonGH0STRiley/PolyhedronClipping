@@ -105,8 +105,7 @@ async function main() {
 		void main() {
 			vec4 planeInEC = planeToEC(u_clippingPlane, u_viewMatrix, u_viewNormalMatrix);
 			float distance = calDistance(planeInEC, v_modelViewPosition);
-			float planeSide = dot(v_modelViewPosition, planeInEC.xyz);
-			if (distance * planeSide < 1e-4) {
+			if (sign(planeInEC.z) * distance > 1e-4) {
 				discard;
 			}
 			gl_FragColor = u_color;

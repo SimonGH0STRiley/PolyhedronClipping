@@ -587,7 +587,7 @@
 	/**
 	 * Creates vertices for a truncated regular triangular pyramid. A truncated
 	 * regular triangular pyramid can also be used to create regular triangular 
-	 * prisms and regular triangular pyramids. The truncated regular triangular 
+	 * cuboids and regular triangular pyramids. The truncated regular triangular 
 	 * pyramid will be created centered about the origin, with the y axis as 
 	 * its vertical axis. The created pyramid has position, normal and uv
 	 * streams.
