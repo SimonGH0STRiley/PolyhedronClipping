@@ -430,6 +430,7 @@ async function main() {
 
 	function initObjectsMap(objectsMap, objectKey) {
 		objectsMap.clear();
+		
 		objectsMap.set(
 			'fillModelBuffer', {
 				// 填充切面背后的几何体到模版缓冲
@@ -468,7 +469,6 @@ async function main() {
 				uniforms: planeUniforms,
 				renderOption: {
 					disableColor: false,
-					disableDepthWrite: true,
 					depthFunc: gl.GREATER,
 				}
 			}
@@ -479,7 +479,6 @@ async function main() {
 				bufferInfo: objectBufferInfo.get(objectKey),
 				uniforms: objectUniforms,
 				renderOption: {
-					disableDepth: true,
 					cullFace: gl.FRONT,
 				}
 			}
@@ -490,7 +489,8 @@ async function main() {
 				bufferInfo: planeBufferInfo,
 				uniforms: planeInnerUniforms,
 				renderOption: {
-					disableDepth: true,
+					clearDepth: true,
+					depthFunc: gl.ALWAYS,
 					useStencil: true,
 					stencilOp: [gl.KEEP, gl.KEEP, gl.KEEP],
 					stencilFunc: [gl.EQUAL, 0x80, 0x80],
@@ -503,8 +503,6 @@ async function main() {
 				bufferInfo: objectBufferInfo.get(objectKey + '-edge'),
 				uniforms: objectEdgeUniforms,
 				renderOption: {
-					// clearDepth: true,
-					depthFunc: gl.ALWAYS,
 				}
 			}
 		).set(
@@ -622,7 +620,6 @@ async function main() {
 					}
 					if (nextAnimation.cameraInfo) {
 						const middleCameraInfo = animationInterpolate(lastAnimation.cameraInfo, nextAnimation.cameraInfo, timePercentage, nextAnimation.interpolateFunc);
-						// console.log(middleCameraInfo);
 						cameraNormal = m4.cloneVec3(angleToVector(middleCameraInfo.rotateTheta, middleCameraInfo.rotatePhi));
 						
 						if (Math.abs(cameraNormal[1]) === 1) {
@@ -632,7 +629,6 @@ async function main() {
 					}
 				}
 				// TODO: 同步数值变化到界面
-				// console.log(JSON.stringify(planeInfo));
 				updatePlaneTransformMatrix(planeInfo);
 			}
 			
