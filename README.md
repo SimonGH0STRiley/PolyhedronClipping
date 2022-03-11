@@ -8,4 +8,6 @@ math, polyhedron and WebGL libraries.
 # Installing and testing
 
 After clone this repo, to open it, only open the index.html within a browser compatible
-with WebGL
+with WebGL.
+
+```python -m SimpleHTTPServer; ```
